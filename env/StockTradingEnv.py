@@ -169,5 +169,5 @@ class StockTradingEnv(gym.Env):
                 hold_signals.append(i)
                 hold_prices.append(price)
         plt.plot(self._prices)
-        plt.plot(buy_signals, buy_prices,'g')
-        plt.plot(sell_signals, sell_prices,'r')
+        plt.scatter(buy_signals, buy_prices,color='green')
+        plt.scatter(sell_signals, sell_prices,color='red')
