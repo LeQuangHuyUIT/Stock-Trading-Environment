@@ -96,7 +96,7 @@ class StockTradingEnv(gym.Env):
         else:
             self._position_history.append(2)
 
-        self._prices.append(current_price)
+        self._prices.append(self.df.loc[self.current_step, "Close"])
 
         self.net_worth = self.balance + self.shares_held * current_price
 
@@ -137,7 +137,7 @@ class StockTradingEnv(gym.Env):
         # Set the current step to a random point within the data frame
         # self.current_step = random.randint(
         #     0, len(self.df.loc[:, 'Open'].values) - 6)
-        self.current_step =len(self.df) - self.num_tests - 6
+        self.current_step =len(self.df) - self.num_tests
 
         return self._next_observation()
 
