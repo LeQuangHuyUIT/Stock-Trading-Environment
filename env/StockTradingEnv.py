@@ -171,3 +171,4 @@ class StockTradingEnv(gym.Env):
         plt.plot(self._prices)
         plt.scatter(buy_signals, buy_prices,color='green')
         plt.scatter(sell_signals, sell_prices,color='red')
+        plt.show()
