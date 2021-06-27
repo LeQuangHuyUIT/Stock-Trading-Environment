@@ -159,7 +159,7 @@ class StockTradingEnv(gym.Env):
             signal = self._position_history[i]
             price = self._prices[i]
             if signal == 0:
-                buy_signal.append(i)
+                buy_signals.append(i)
                 buy_prices.append(price)
             elif signal == 1:
                 sell_signals.append(i)
