@@ -19,7 +19,7 @@ class StockTradingEnv(gym.Env):
     """A stock trading environment for OpenAI gym"""
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, df, num_trains):
+    def __init__(self, df, num_tests):
         super(StockTradingEnv, self).__init__()
 
         self.df = df
@@ -35,7 +35,7 @@ class StockTradingEnv(gym.Env):
 
         self._position_history = []
         self._prices = []
-        self.num_trains = num_trains
+        self.num_tests = num_tests
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
@@ -135,11 +135,9 @@ class StockTradingEnv(gym.Env):
         self.total_sales_value = 0
 
         # Set the current step to a random point within the data frame
-        self.current_step = random.randint(
-            0, len(self.df.loc[:, 'Open'].values) - 6)
-        print('current_step: ',self.current_step)
-        self.current_step = self.num_trains
-        print('current_step: ',self.current_step)
+        # self.current_step = random.randint(
+        #     0, len(self.df.loc[:, 'Open'].values) - 6)
+        self.current_step =len(self.df) - self.num_tests
 
         return self._next_observation()
 
