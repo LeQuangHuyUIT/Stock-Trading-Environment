@@ -35,6 +35,7 @@ class StockTradingEnv(gym.Env):
 
         self._position_history = []
         self._prices = []
+        self._dates = []
         self.num_tests = num_tests
 
     def _next_observation(self):
@@ -97,6 +98,7 @@ class StockTradingEnv(gym.Env):
             self._position_history.append(2)
 
         self._prices.append(self.df.loc[self.current_step, "Close"])
+        self._dates.append(self.df.loc[self.current_step, "Date"])
 
         self.net_worth = self.balance + self.shares_held * current_price
 
@@ -171,7 +173,7 @@ class StockTradingEnv(gym.Env):
                 hold_signals.append(i)
                 hold_prices.append(price)
         x = np.arange(len(self._prices))
-        plt.plot(x,self._prices)
+        plt.plot(self._dates,self._prices)
         plt.scatter(buy_signals, buy_prices,color='green', label='Buy signal')
         plt.scatter(sell_signals, sell_prices,color='red', label='Sell signal')
         plt.scatter(hold_signals, hold_prices,color='grey', label='Hold signal')
