@@ -114,7 +114,7 @@ class StockTradingEnv(gym.Env):
 
         self.current_step += 1
 
-        if self.current_step > len(self.df.loc[:, 'Open'].values):
+        if self.current_step > len(self.df.loc[:, 'Open'].values) - 6:
             self.current_step = 0
 
         delay_modifier = (self.current_step / MAX_STEPS)
@@ -139,7 +139,7 @@ class StockTradingEnv(gym.Env):
         # Set the current step to a random point within the data frame
         # self.current_step = random.randint(
         #     0, len(self.df.loc[:, 'Open'].values) - 6)
-        self.current_step =len(self.df) - self.num_tests
+        self.current_step =len(self.df) - self.num_tests - 6
 
         return self._next_observation()
 
