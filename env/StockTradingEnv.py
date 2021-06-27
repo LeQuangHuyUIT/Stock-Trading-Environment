@@ -32,6 +32,9 @@ class StockTradingEnv(gym.Env):
         self.observation_space = spaces.Box(
             low=0, high=1, shape=(6, 6), dtype=np.float16)
 
+        self._position_history = []
+        self._prices = []
+
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
         frame = np.array([
@@ -78,6 +81,7 @@ class StockTradingEnv(gym.Env):
             self.cost_basis = (
                 prev_cost + additional_cost) / (self.shares_held + shares_bought)
             self.shares_held += shares_bought
+            self._position_history.append(0)
 
         elif action_type < 2:
             # Sell amount % of shares held
@@ -86,6 +90,11 @@ class StockTradingEnv(gym.Env):
             self.shares_held -= shares_sold
             self.total_shares_sold += shares_sold
             self.total_sales_value += shares_sold * current_price
+            self._position_history.append(1)
+        else:
+            self._position_history.append(2)
+
+        self._prices.append(current_price)
 
         self.net_worth = self.balance + self.shares_held * current_price
 
@@ -142,3 +151,22 @@ class StockTradingEnv(gym.Env):
         print(
             f'Net worth: {self.net_worth} (Max net worth: {self.max_net_worth})')
         print(f'Profit: {profit}')
+
+    def render_all(self):
+        buy_signals, sell_signals, hold_signals = [], [], []
+        buy_prices, sell_prices, hold_prices = [], [], []
+        for i in range(len(self._position_history)):
+            signal = self._position_history[i]
+            price = self._prices[i]
+            if signal == 0:
+                buy_signal.append(i)
+                buy_prices.append(price)
+            elif signal == 1:
+                sell_signals.append(i)
+                sell_prices.append(price)
+            else:
+                hold_signals.append(i)
+                hold_prices.append(price)
+        plt.plot(self._prices)
+        plt.plot(buy_signals, buy_prices,'g')
+        plt.plot(sell_signals, sell_prices,'r')
