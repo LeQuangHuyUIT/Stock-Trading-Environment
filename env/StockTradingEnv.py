@@ -35,6 +35,7 @@ class StockTradingEnv(gym.Env):
 
         self._position_history = []
         self._prices = []
+        self.num_trains = num_trains
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
