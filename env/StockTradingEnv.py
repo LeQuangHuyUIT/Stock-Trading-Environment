@@ -114,7 +114,7 @@ class StockTradingEnv(gym.Env):
 
         self.current_step += 1
 
-        if self.current_step > len(self.df.loc[:, 'Open'].values) - 6:
+        if self.current_step > len(self.df.loc[:, 'Open'].values):
             self.current_step = 0
 
         delay_modifier = (self.current_step / MAX_STEPS)
