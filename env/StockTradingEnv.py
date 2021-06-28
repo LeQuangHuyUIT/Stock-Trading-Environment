@@ -36,7 +36,7 @@ class StockTradingEnv(gym.Env):
         self._position_history = []
         self._prices = []
         self._dates = []
-        self.num_tests = num_tests
+        # self.num_tests = num_tests
         self.window_size = window_size
         self.frame_bound = frame_bound
         self.current_step = window_size+1
