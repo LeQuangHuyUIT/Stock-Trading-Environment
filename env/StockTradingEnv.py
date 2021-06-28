@@ -19,10 +19,10 @@ class StockTradingEnv(gym.Env):
     """A stock trading environment for OpenAI gym"""
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, df, frame_bound, window_size):
+    def __init__(self, df, num_tests):
         super(StockTradingEnv, self).__init__()
 
-        self.df = df[:frame_bound[1]]
+        self.df = df
         self.reward_range = (0, MAX_ACCOUNT_BALANCE)
 
         # Actions of the format Buy x%, Sell x%, Hold, etc.
@@ -36,19 +36,21 @@ class StockTradingEnv(gym.Env):
         self._position_history = []
         self._prices = []
         self._dates = []
-        # self.num_tests = num_tests
-        self.window_size = window_size
-        self.frame_bound = frame_bound
-        self.current_step = frame_bound[0] 
+        self.num_tests = num_tests
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
         frame = np.array([
-            self.df.loc[self.current_step - self.window_size: self.current_step, 'Open'].values / MAX_SHARE_PRICE,
-            self.df.loc[self.current_step - self.window_size: self.current_step, 'High'].values / MAX_SHARE_PRICE,
-            self.df.loc[self.current_step - self.window_size: self.current_step, 'Low'].values / MAX_SHARE_PRICE,
-            self.df.loc[self.current_step - self.window_size: self.current_step, 'Close'].values / MAX_SHARE_PRICE,
-            self.df.loc[self.current_step - self.window_size: self.current_step, 'Volume'].values / MAX_NUM_SHARES,
+            self.df.loc[self.current_step: self.current_step +
+                        5, 'Open'].values / MAX_SHARE_PRICE,
+            self.df.loc[self.current_step: self.current_step +
+                        5, 'High'].values / MAX_SHARE_PRICE,
+            self.df.loc[self.current_step: self.current_step +
+                        5, 'Low'].values / MAX_SHARE_PRICE,
+            self.df.loc[self.current_step: self.current_step +
+                        5, 'Close'].values / MAX_SHARE_PRICE,
+            self.df.loc[self.current_step: self.current_step +
+                        5, 'Volume'].values / MAX_NUM_SHARES,
         ])
 
         # Append additional data and scale each value to between 0-1
@@ -140,7 +142,7 @@ class StockTradingEnv(gym.Env):
         # Set the current step to a random point within the data frame
         # self.current_step = random.randint(
         #     0, len(self.df.loc[:, 'Open'].values) - 6)
-        self.current_step = self.frame_bound[0]
+        self.current_step =len(self.df) - self.num_tests - 6
 
         return self._next_observation()
 
