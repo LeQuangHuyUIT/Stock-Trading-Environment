@@ -62,7 +62,7 @@ class StockTradingEnv(gym.Env):
     def _take_action(self, action):
         # Set the current price to a random price within the time step
         current_price = random.uniform(
-            self.df.loc[self.current_step, "Open"], self.df.loc[self.current_step, "Close"])
+            self.df["Open"][self.current_step:self.current_step+1], self.df["Close"][self.current_step:self.current_step+1])
 
         action_type = action[0]
         amount = action[1]
@@ -91,8 +91,8 @@ class StockTradingEnv(gym.Env):
         else:
             self._position_history.append(2)
 
-        self._prices.append(self.df.loc[self.current_step, "Close"])
-        self._dates.append(self.df.loc[self.current_step, "Date"])
+        self._prices.append(self.df["Close"][self.current_step:self.current_step+1])
+        self._dates.append(self.df["Date"][self.current_step:self.current_step+1])
 
         self.net_worth = self.balance + self.shares_held * current_price
 
