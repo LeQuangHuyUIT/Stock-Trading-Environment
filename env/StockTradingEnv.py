@@ -100,7 +100,7 @@ class StockTradingEnv(gym.Env):
             self._position_history.append(2)
 
         self._prices.append(float(self.df["Close"][self.current_step:self.current_step+1]))
-        self._dates.append(datetime.strptime(self.df["Date"][self.current_step:self.current_step+1].values[0],'%d-%m-%y').date())
+        self._dates.append(datetime.strptime(str(self.df["Date"][self.current_step:self.current_step+1].values[0]),'%d-%m-%y').date())
 
         self.net_worth = self.balance + self.shares_held * current_price
 
