@@ -64,7 +64,6 @@ class StockTradingEnv(gym.Env):
 
     def _take_action(self, action):
         # Set the current price to a random price within the time step
-        print("sample: ", self.df["Open"][self.current_step:self.current_step+1])
         current_price = random.uniform(
             float(self.df["Open"][self.current_step:self.current_step+1]), float(self.df["Close"][self.current_step:self.current_step+1]))
 
@@ -99,7 +98,7 @@ class StockTradingEnv(gym.Env):
             self._position_history.append(2)
 
         self._prices.append(float(self.df["Close"][self.current_step:self.current_step+1]))
-        self._dates.append(self.df["Date"][self.current_step:self.current_step+1])
+        self._dates.append(str(self.df["Date"][self.current_step:self.current_step+1]))
 
         self.net_worth = self.balance + self.shares_held * current_price
 
@@ -169,6 +168,9 @@ class StockTradingEnv(gym.Env):
     def render_all(self):
         buy_signals, sell_signals, hold_signals = [], [], []
         buy_prices, sell_prices, hold_prices = [], [], []
+        print("_position_history: ",self._position_history)
+        print("_prices: ",self._prices)
+        print("_dates: ",self._dates)
         for i in range(len(self._position_history)):
             signal = self._position_history[i]
             price = self._prices[i]
