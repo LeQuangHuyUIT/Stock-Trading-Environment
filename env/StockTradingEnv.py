@@ -24,7 +24,6 @@ class StockTradingEnv(gym.Env):
     def __init__(self, df, frame_bound):
         super(StockTradingEnv, self).__init__()
         self.df = df[frame_bound[0]:frame_bound[1]]
-        self.df['Date'] = pd.to_datetime(self.df['Date'])
         self.reward_range = (0, MAX_ACCOUNT_BALANCE)
 
         # Actions of the format Buy x%, Sell x%, Hold, etc.
@@ -101,7 +100,7 @@ class StockTradingEnv(gym.Env):
             self._position_history.append(2)
 
         self._prices.append(float(self.df["Close"][self.current_step:self.current_step+1]))
-        self._dates.append(self.df["Date"][self.current_step:self.current_step+1].values[0])
+        self._dates.append(datetime.strptime(self.df["Date"][self.current_step:self.current_step+1].values[0],'%d-%m-%y').date())
 
         self.net_worth = self.balance + self.shares_held * current_price
 
@@ -191,6 +190,6 @@ class StockTradingEnv(gym.Env):
         plt.scatter(buy_signals, buy_prices,color='green', label='Buy signal')
         plt.scatter(sell_signals, sell_prices,color='red', label='Sell signal')
         plt.scatter(hold_signals, hold_prices,color='grey', label='Hold signal')
-        plt.autofmt_xdate()
+        plt.gcf().autofmt_xdate()
         plt.legend()
         plt.show()
