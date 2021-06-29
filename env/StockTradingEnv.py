@@ -110,7 +110,7 @@ class StockTradingEnv(gym.Env):
 
         self.current_step += 1
         done = False
-        if self.current_step > len(self.df.loc[:, 'Open'].values):
+        if self.current_step > len(self.df.loc[:, 'Open'].values) + self.frame_bound[0]:
             # self._position_history = []
             # self._prices = []
             # self._dates = []
