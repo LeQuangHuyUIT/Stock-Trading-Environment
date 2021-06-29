@@ -22,7 +22,7 @@ class StockTradingEnv(gym.Env):
     def __init__(self, df, frame_bound):
         super(StockTradingEnv, self).__init__()
 
-        self.df = df[:frame_bound[1]]
+        self.df = df[frame_bound[0]:frame_bound[1]]
         self.reward_range = (0, MAX_ACCOUNT_BALANCE)
 
         # Actions of the format Buy x%, Sell x%, Hold, etc.
@@ -37,6 +37,7 @@ class StockTradingEnv(gym.Env):
         self.frame_bound = frame_bound
         self._prices = []
         self._dates = []
+        self.current_step = frame_bound[0]+5
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
@@ -135,7 +136,7 @@ class StockTradingEnv(gym.Env):
         # self.current_step = random.randint(
         #     0, len(self.df.loc[:, 'Open'].values) - 6)
         # self.current_step =len(self.df) - self.frame_bound - 6
-        self.current_step = len(self.df.loc[:, 'Open'].values) - self.frame_bound[0] - 6
+        self.current_step = self.frame_bound[0] + 5
 
         return self._next_observation()
 
