@@ -117,6 +117,7 @@ class StockTradingEnv(gym.Env):
             # self._prices = []
             # self._dates = []
             done = True
+            return None, None, done, {}
 
         delay_modifier = (self.current_step / MAX_STEPS)
 
