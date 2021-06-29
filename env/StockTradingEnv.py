@@ -187,7 +187,7 @@ class StockTradingEnv(gym.Env):
                 hold_signals.append(i)
                 hold_prices.append(price)
         # plt.plot_date(self.df['Date'][6:6+len(self._prices)],self._prices)
-        plt.plot_date(self.df['Date'][6:6+len(self._prices)])
+        plt.plot_date(self.df['Date'][6:6+len(self._prices)],[i for i in range(len(self._dates))])
         plt.scatter(buy_signals, buy_prices,color='green', label='Buy signal')
         plt.scatter(sell_signals, sell_prices,color='red', label='Sell signal')
         plt.scatter(hold_signals, hold_prices,color='grey', label='Hold signal')
