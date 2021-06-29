@@ -38,7 +38,7 @@ class StockTradingEnv(gym.Env):
         self._position_history = []
         self.frame_bound = frame_bound
         self._prices = []
-        self._dates = pd.Series()
+        self._dates = []
         self.current_step = 6
 
     def _next_observation(self):
