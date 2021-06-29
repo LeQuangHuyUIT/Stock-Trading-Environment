@@ -36,7 +36,6 @@ class StockTradingEnv(gym.Env):
         self.frame_bound = frame_bound
         self._prices = []
         self._dates = []
-        self.current_step = 6
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
