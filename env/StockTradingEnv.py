@@ -116,7 +116,7 @@ class StockTradingEnv(gym.Env):
         self.current_step += 1
         done = False
         print(f"self.current_step: {self.current_step}, len(df): {len(self.df)}")
-        if self.current_step > len(self.df):
+        if self.current_step >= len(self.df):
             print("STOP HERE")
             # self._position_history = []
             # self._prices = []
