@@ -21,14 +21,6 @@ class StockTradingEnv(gym.Env):
 
     def __init__(self, df, frame_bound):
         super(StockTradingEnv, self).__init__()
-        self.balance = INITIAL_ACCOUNT_BALANCE
-        self.net_worth = INITIAL_ACCOUNT_BALANCE
-        self.max_net_worth = INITIAL_ACCOUNT_BALANCE
-        self.shares_held = 0
-        self.cost_basis = 0
-        self.total_shares_sold = 0
-        self.total_sales_value = 0
-
         self.df = df[frame_bound[0]:frame_bound[1]]
         self.reward_range = (0, MAX_ACCOUNT_BALANCE)
 
@@ -48,26 +40,25 @@ class StockTradingEnv(gym.Env):
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
-        frame = np.array([
+        frame = np.array([[
             self.df.loc[self.current_step - 5 : self.current_step, 'Open'].values / MAX_SHARE_PRICE,
             self.df.loc[self.current_step - 5 : self.current_step, 'High'].values / MAX_SHARE_PRICE,
             self.df.loc[self.current_step - 5 : self.current_step, 'Low'].values / MAX_SHARE_PRICE,
             self.df.loc[self.current_step - 5 : self.current_step, 'Close'].values / MAX_SHARE_PRICE,
             self.df.loc[self.current_step - 5 : self.current_step, 'Volume'].values / MAX_NUM_SHARES,
-        ])
+        ]])
 
         # Append additional data and scale each value to between 0-1
-        # obs = np.append(frame, [
-        #     self.balance / MAX_ACCOUNT_BALANCE,
-        #     self.max_net_worth / MAX_ACCOUNT_BALANCE,
-        #     self.shares_held / MAX_NUM_SHARES,
-        #     self.cost_basis / MAX_SHARE_PRICE,
-        #     self.total_shares_sold / MAX_NUM_SHARES,
-        #     self.total_sales_value / (MAX_NUM_SHARES * MAX_SHARE_PRICE),
-        # ], axis=0)
+        obs = np.append(frame, [
+            self.balance / MAX_ACCOUNT_BALANCE,
+            self.max_net_worth / MAX_ACCOUNT_BALANCE,
+            self.shares_held / MAX_NUM_SHARES,
+            self.cost_basis / MAX_SHARE_PRICE,
+            self.total_shares_sold / MAX_NUM_SHARES,
+            self.total_sales_value / (MAX_NUM_SHARES * MAX_SHARE_PRICE),
+        ], axis=0)
 
-        # return obs
-        return frame
+        return obs
 
     def _take_action(self, action):
         # Set the current price to a random price within the time step
