@@ -19,10 +19,10 @@ class StockTradingEnv(gym.Env):
     """A stock trading environment for OpenAI gym"""
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, df, num_tests):
+    def __init__(self, df, frame_bound):
         super(StockTradingEnv, self).__init__()
 
-        self.df = df
+        self.df = df[:frame_bound[1]]
         self.reward_range = (0, MAX_ACCOUNT_BALANCE)
 
         # Actions of the format Buy x%, Sell x%, Hold, etc.
@@ -34,9 +34,9 @@ class StockTradingEnv(gym.Env):
             low=0, high=1, shape=(6, 6), dtype=np.float16)
 
         self._position_history = []
+        self.frame_bound = frame_bound
         self._prices = []
         self._dates = []
-        self.num_tests = num_tests
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
@@ -113,17 +113,14 @@ class StockTradingEnv(gym.Env):
         self._take_action(action)
 
         self.current_step += 1
-
+        done = False
         if self.current_step > len(self.df.loc[:, 'Open'].values) - 6:
-            self._position_history = []
-            self._prices = []
-            self._dates = []
-            self.current_step = 0
+            done = True
 
         delay_modifier = (self.current_step / MAX_STEPS)
 
         reward = self.balance * delay_modifier
-        done = self.net_worth <= 0
+        # done = self.net_worth <= 0
 
         obs = self._next_observation()
 
@@ -142,7 +139,8 @@ class StockTradingEnv(gym.Env):
         # Set the current step to a random point within the data frame
         # self.current_step = random.randint(
         #     0, len(self.df.loc[:, 'Open'].values) - 6)
-        self.current_step =len(self.df) - self.num_tests - 6
+        # self.current_step =len(self.df) - self.frame_bound - 6
+        self.current_step = frame_bound[1] - 52
 
         return self._next_observation()
 
