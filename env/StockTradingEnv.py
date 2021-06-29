@@ -57,16 +57,17 @@ class StockTradingEnv(gym.Env):
         ])
 
         # Append additional data and scale each value to between 0-1
-        obs = np.append(frame, [
-            self.balance / MAX_ACCOUNT_BALANCE,
-            self.max_net_worth / MAX_ACCOUNT_BALANCE,
-            self.shares_held / MAX_NUM_SHARES,
-            self.cost_basis / MAX_SHARE_PRICE,
-            self.total_shares_sold / MAX_NUM_SHARES,
-            self.total_sales_value / (MAX_NUM_SHARES * MAX_SHARE_PRICE),
-        ], axis=0)
+        # obs = np.append(frame, [
+        #     self.balance / MAX_ACCOUNT_BALANCE,
+        #     self.max_net_worth / MAX_ACCOUNT_BALANCE,
+        #     self.shares_held / MAX_NUM_SHARES,
+        #     self.cost_basis / MAX_SHARE_PRICE,
+        #     self.total_shares_sold / MAX_NUM_SHARES,
+        #     self.total_sales_value / (MAX_NUM_SHARES * MAX_SHARE_PRICE),
+        # ], axis=0)
 
-        return obs
+        # return obs
+        return frame
 
     def _take_action(self, action):
         # Set the current price to a random price within the time step
