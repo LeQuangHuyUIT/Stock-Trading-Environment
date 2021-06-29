@@ -40,23 +40,23 @@ class StockTradingEnv(gym.Env):
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
-        frame = np.array([[
+        frame = np.array([
             self.df.loc[self.current_step - 5 : self.current_step, 'Open'].values / MAX_SHARE_PRICE,
             self.df.loc[self.current_step - 5 : self.current_step, 'High'].values / MAX_SHARE_PRICE,
             self.df.loc[self.current_step - 5 : self.current_step, 'Low'].values / MAX_SHARE_PRICE,
             self.df.loc[self.current_step - 5 : self.current_step, 'Close'].values / MAX_SHARE_PRICE,
             self.df.loc[self.current_step - 5 : self.current_step, 'Volume'].values / MAX_NUM_SHARES,
-        ]])
+        ])
 
         # Append additional data and scale each value to between 0-1
-        obs = np.append(frame, [
+        obs = np.append(frame, [[
             self.balance / MAX_ACCOUNT_BALANCE,
             self.max_net_worth / MAX_ACCOUNT_BALANCE,
             self.shares_held / MAX_NUM_SHARES,
             self.cost_basis / MAX_SHARE_PRICE,
             self.total_shares_sold / MAX_NUM_SHARES,
             self.total_sales_value / (MAX_NUM_SHARES * MAX_SHARE_PRICE),
-        ], axis=0)
+        ]], axis=0)
 
         return obs
 
