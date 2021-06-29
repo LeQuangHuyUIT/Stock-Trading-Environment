@@ -5,6 +5,8 @@ from gym import spaces
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import datetime
+from datetime import datetime
 
 MAX_ACCOUNT_BALANCE = 2147483647
 MAX_NUM_SHARES = 2147483647
@@ -98,7 +100,7 @@ class StockTradingEnv(gym.Env):
             self._position_history.append(2)
 
         self._prices.append(float(self.df["Close"][self.current_step:self.current_step+1]))
-        self._dates.append(str(self.df["Date"][self.current_step:self.current_step+1]))
+        self._dates.append(datetime.strptime(str(self.df["Date"][self.current_step:self.current_step+1]),'%d/%m/%y').date())
 
         self.net_worth = self.balance + self.shares_held * current_price
 
