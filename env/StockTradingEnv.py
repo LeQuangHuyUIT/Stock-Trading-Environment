@@ -75,8 +75,11 @@ class StockTradingEnv(gym.Env):
             additional_cost = shares_bought * current_price
 
             self.balance -= additional_cost
-            self.cost_basis = (
-                prev_cost + additional_cost) / (self.shares_held + shares_bought)
+            try:
+                self.cost_basis = (
+                    prev_cost + additional_cost) / (self.shares_held + shares_bought)
+            except:
+                self.cost = 0
             self.shares_held += shares_bought
             self._position_history.append(0)
 
