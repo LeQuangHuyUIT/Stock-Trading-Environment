@@ -117,9 +117,9 @@ class StockTradingEnv(gym.Env):
 
         self.current_step += 1
         done = False
-        print(f"self.current_step: {self.current_step}, len(df): {len(self.df)}")
+        # print(f"self.current_step: {self.current_step}, len(df): {len(self.df)}")
         if self.current_step >= len(self.df):
-            print("STOP HERE")
+            # print("STOP HERE")
             # self._position_history = []
             # self._prices = []
             # self._dates = []
@@ -132,7 +132,7 @@ class StockTradingEnv(gym.Env):
         # done = self.net_worth <= 0
 
         obs = self._next_observation()
-        print(f"observation : {obs}, reward : {reward}, done: {done}")
+        # print(f"observation : {obs}, reward : {reward}, done: {done}")
 
         return obs, reward, done, {}
 
@@ -171,9 +171,9 @@ class StockTradingEnv(gym.Env):
     def render_all(self):
         buy_signals, sell_signals, hold_signals = [], [], []
         buy_prices, sell_prices, hold_prices = [], [], []
-        print("_position_history: ",self._position_history)
-        print("_prices: ",self._prices)
-        print("_dates: ",self._dates)
+        # print("_position_history: ",self._position_history)
+        # print("_prices: ",self._prices)
+        # print("_dates: ",self._dates)
         for i in range(len(self._position_history)):
             signal = self._position_history[i]
             price = self._prices[i]
