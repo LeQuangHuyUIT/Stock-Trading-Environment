@@ -37,7 +37,7 @@ class StockTradingEnv(gym.Env):
         self.frame_bound = frame_bound
         self._prices = []
         self._dates = []
-        self.current_step = 5
+        self.current_step = 6
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
@@ -139,7 +139,7 @@ class StockTradingEnv(gym.Env):
         # self.current_step = random.randint(
         #     0, len(self.df.loc[:, 'Open'].values) - 6)
         # self.current_step =len(self.df) - self.frame_bound - 6
-        self.current_step = 5
+        self.current_step = 6
 
         return self._next_observation()
 
