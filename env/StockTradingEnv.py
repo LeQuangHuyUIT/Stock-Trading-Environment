@@ -46,7 +46,7 @@ class StockTradingEnv(gym.Env):
             np.array(self.df['Close'][self.current_step-6 : self.current_step] / MAX_SHARE_PRICE),
             np.array(self.df['Volume'][self.current_step-6 : self.current_step] / MAX_NUM_SHARES),
         ])
-
+        print("self.current_step: ",self.current_step, "frame: ",frame," sample: ",np.array(self.df['Open'][self.current_step-6 : self.current_step] / MAX_SHARE_PRICE))
         # Append additional data and scale each value to between 0-1
         obs = np.append(frame, [[
             self.balance / MAX_ACCOUNT_BALANCE,
@@ -63,7 +63,6 @@ class StockTradingEnv(gym.Env):
         # Set the current price to a random price within the time step
         current_price = random.uniform(
             float(self.df["Open"][self.current_step:self.current_step+1]), float(self.df["Close"][self.current_step:self.current_step+1]))
-        print("current_price: ",current_price)
 
         action_type = action[0]
         amount = action[1]
