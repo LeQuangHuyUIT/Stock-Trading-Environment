@@ -190,5 +190,6 @@ class StockTradingEnv(gym.Env):
         plt.scatter(buy_signals, buy_prices,color='green', label='Buy signal')
         plt.scatter(sell_signals, sell_prices,color='red', label='Sell signal')
         plt.scatter(hold_signals, hold_prices,color='grey', label='Hold signal')
+        plt.autofmt_xdate()
         plt.legend()
         plt.show()
