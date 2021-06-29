@@ -49,7 +49,7 @@ class StockTradingEnv(gym.Env):
         ])
 
         # Append additional data and scale each value to between 0-1
-        obs = np.append([frame], [[
+        obs = np.append(frame, [[
             self.balance / MAX_ACCOUNT_BALANCE,
             self.max_net_worth / MAX_ACCOUNT_BALANCE,
             self.shares_held / MAX_NUM_SHARES,
