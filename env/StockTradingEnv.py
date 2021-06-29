@@ -39,7 +39,7 @@ class StockTradingEnv(gym.Env):
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
-        print("self.current_step: ",self.current_step)
+        # print("self.current_step: ",self.current_step)
         frame = np.array([
             np.array(self.df['Open'][self.current_step-6 : self.current_step] / MAX_SHARE_PRICE),
             np.array(self.df['High'][self.current_step-6 : self.current_step] / MAX_SHARE_PRICE),
@@ -47,8 +47,8 @@ class StockTradingEnv(gym.Env):
             np.array(self.df['Close'][self.current_step-6 : self.current_step] / MAX_SHARE_PRICE),
             np.array(self.df['Volume'][self.current_step-6 : self.current_step] / MAX_NUM_SHARES),
         ])
-        print("sample: ",np.array(self.df['Open'][self.current_step-6 : self.current_step] / MAX_SHARE_PRICE))
-        print("frame: ",frame)
+        # print("sample: ",np.array(self.df['Open'][self.current_step-6 : self.current_step] / MAX_SHARE_PRICE))
+        # print("frame: ",frame)
         # Append additional data and scale each value to between 0-1
         obs = np.append(frame, [[
             self.balance / MAX_ACCOUNT_BALANCE,
@@ -113,6 +113,7 @@ class StockTradingEnv(gym.Env):
 
         self.current_step += 1
         done = False
+        print(f"self.current_step: {self.current_step}, len(df): {len(self.df)}")
         if self.current_step > len(self.df):
             print("STOP HERE")
             # self._position_history = []
