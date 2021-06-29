@@ -63,6 +63,7 @@ class StockTradingEnv(gym.Env):
         # Set the current price to a random price within the time step
         current_price = random.uniform(
             float(self.df["Open"][self.current_step:self.current_step+1]), float(self.df["Close"][self.current_step:self.current_step+1]))
+        print("current_price: ",current_price)
 
         action_type = action[0]
         amount = action[1]
@@ -79,7 +80,7 @@ class StockTradingEnv(gym.Env):
                 self.cost_basis = (
                     prev_cost + additional_cost) / (self.shares_held + shares_bought)
             except:
-                self.cost_basis = 1
+                self.cost_basis = 0
             self.shares_held += shares_bought
             self._position_history.append(0)
 
