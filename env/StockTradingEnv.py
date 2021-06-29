@@ -102,7 +102,7 @@ class StockTradingEnv(gym.Env):
 
         self._prices.append(float(self.df["Close"][self.current_step:self.current_step+1]))
         # self._dates.append(datetime.strptime(str(self.df["Date"][self.current_step:self.current_step+1].values[0]),'%d-%m-%Y').date())
-        self._dates.append(self.df["Date"][self.current_step:self.current_step+1].values[0])
+        self._dates.append(str(self.df["Date"][self.current_step:self.current_step+1].values[0]))
         self.net_worth = self.balance + self.shares_held * current_price
 
         if self.net_worth > self.max_net_worth:
@@ -187,7 +187,8 @@ class StockTradingEnv(gym.Env):
                 hold_signals.append(i)
                 hold_prices.append(price)
         # plt.plot_date(self.df['Date'][6:6+len(self._prices)],self._prices)
-        plt.plot_date(self.df['Date'][6:6+len(self._prices)],[i for i in range(len(self._dates))])
+        # plt.plot_date(self.df['Date'][6:6+len(self._prices)],[i for i in range(len(self._dates))])
+        plt.plot(self._dates,self._prices)
         plt.scatter(buy_signals, buy_prices,color='green', label='Buy signal')
         plt.scatter(sell_signals, sell_prices,color='red', label='Sell signal')
         plt.scatter(hold_signals, hold_prices,color='grey', label='Hold signal')
