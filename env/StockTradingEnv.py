@@ -21,6 +21,13 @@ class StockTradingEnv(gym.Env):
 
     def __init__(self, df, frame_bound):
         super(StockTradingEnv, self).__init__()
+        self.balance = INITIAL_ACCOUNT_BALANCE
+        self.net_worth = INITIAL_ACCOUNT_BALANCE
+        self.max_net_worth = INITIAL_ACCOUNT_BALANCE
+        self.shares_held = 0
+        self.cost_basis = 0
+        self.total_shares_sold = 0
+        self.total_sales_value = 0
 
         self.df = df[frame_bound[0]:frame_bound[1]]
         self.reward_range = (0, MAX_ACCOUNT_BALANCE)
@@ -110,7 +117,7 @@ class StockTradingEnv(gym.Env):
 
         self.current_step += 1
         done = False
-        if self.current_step > len(self.df) - 6:
+        if self.current_step > len(self.df):
             # self._position_history = []
             # self._prices = []
             # self._dates = []
