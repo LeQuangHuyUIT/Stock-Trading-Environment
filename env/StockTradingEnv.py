@@ -21,12 +21,12 @@ class StockTradingEnv(gym.Env):
     """A stock trading environment for OpenAI gym"""
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, df, frame_bound):
+    def __init__(self, df, frame_bound, test=False):
         super(StockTradingEnv, self).__init__()
         self.df = df[frame_bound[0]:frame_bound[1]]
         self.df['Date'] = pd.to_datetime(self.df['Date'])
         self.reward_range = (0, MAX_ACCOUNT_BALANCE)
-
+        self.test = test
         # Actions of the format Buy x%, Sell x%, Hold, etc.
         self.action_space = spaces.Box(
             low=np.array([0, 0]), high=np.array([3, 1]), dtype=np.float16)
@@ -147,8 +147,10 @@ class StockTradingEnv(gym.Env):
         self.total_sales_value = 0
 
         # Set the current step to a random point within the data frame
-        self.current_step = random.randint(
-            0, len(self.df.loc[:, 'Open'].values) - 6)
+        if self.test == False:
+            self.current_step = random.randint(6, len(self.df.loc[:, 'Open'].values))
+        else:
+            self.current_step = 6
         # self.current_step =len(self.df) - self.frame_bound - 6
         # self.current_step = 6
 
