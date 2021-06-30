@@ -14,7 +14,7 @@ df = pd.read_csv('./data/AAPL.csv')
 df = df.sort_values('Date')
 
 # The algorithms require a vectorized environment to run
-env = DummyVecEnv([lambda: StockTradingEnv(df)])
+env = DummyVecEnv([lambda: StockTradingEnv(df, frame_bound=(1, 500))])
 
 model = PPO2(MlpPolicy, env, verbose=1)
 model.learn(total_timesteps=20000)
