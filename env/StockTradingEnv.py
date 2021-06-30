@@ -147,10 +147,10 @@ class StockTradingEnv(gym.Env):
         self.total_sales_value = 0
 
         # Set the current step to a random point within the data frame
-        # self.current_step = random.randint(
-        #     0, len(self.df.loc[:, 'Open'].values) - 6)
+        self.current_step = random.randint(
+            0, len(self.df.loc[:, 'Open'].values) - 6)
         # self.current_step =len(self.df) - self.frame_bound - 6
-        self.current_step = 6
+        # self.current_step = 6
 
         return self._next_observation()
 
