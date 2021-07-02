@@ -1,232 +1,144 @@
-import random
-import json
-import gym
-from gym import spaces
+#================================================================
+#
+#   File name   : RL-Bitcoin-trading-bot_2.py
+#   Author      : PyLessons
+#   Created date: 2020-12-12
+#   Website     : https://pylessons.com/
+#   GitHub      : https://github.com/pythonlessons/RL-Bitcoin-trading-bot
+#   Description : Trading Crypto with Reinforcement Learning #2
+#
+#================================================================
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import datetime
-from datetime import datetime
+import random
+from collections import deque
+from utils import TradingGraph, Write_to_file
 
-MAX_ACCOUNT_BALANCE = 2147483647
-MAX_NUM_SHARES = 2147483647
-MAX_SHARE_PRICE = 5000
-MAX_OPEN_POSITIONS = 5
-MAX_STEPS = 20000
+class CustomEnv:
+    # A custom Bitcoin trading environment
+    def __init__(self, df, initial_balance=1000, lookback_window_size=50, Render_range = 100):
+        # Define action space and state size and other custom parameters
+        self.df = df.dropna().reset_index()
+        self.df_total_steps = len(self.df)-1
+        self.initial_balance = initial_balance
+        self.lookback_window_size = lookback_window_size
+        self.Render_range = Render_range # render range in visualization
 
-INITIAL_ACCOUNT_BALANCE = 10000
+        # Action space from 0 to 3, 0 is hold, 1 is buy, 2 is sell
+        self.action_space = np.array([0, 1, 2])
 
+        # Orders history contains the balance, net_worth, crypto_bought, crypto_sold, crypto_held values for the last lookback_window_size steps
+        self.orders_history = deque(maxlen=self.lookback_window_size)
+        
+        # Market history contains the OHCL values for the last lookback_window_size prices
+        self.market_history = deque(maxlen=self.lookback_window_size)
 
-class StockTradingEnv(gym.Env):
-	"""A stock trading environment for OpenAI gym"""
-	metadata = {'render.modes': ['human']}
+        # State size contains Market+Orders history for the last lookback_window_size steps
+        self.state_size = (self.lookback_window_size, 10)
 
-	def __init__(self, df, frame_bound, window_size, test=False):
-		super(StockTradingEnv, self).__init__()
-		self.df = df[frame_bound[0]:frame_bound[1]]
-		self.df['Date'] = pd.to_datetime(self.df['Date'])
-		self.reward_range = (0, MAX_ACCOUNT_BALANCE)
-		self.check_test = test
-		# Actions of the format Buy x%, Sell x%, Hold, etc.
-		self.action_space = spaces.Box(
-			low=np.array([0, 0]), high=np.array([3, 1]), dtype=np.float16)
+    # Reset the state of the environment to an initial state
+    def reset(self, env_steps_size = 0):
+        self.visualization = TradingGraph(Render_range=self.Render_range) # init visualization
+        self.trades = deque(maxlen=self.Render_range) # limited orders memory for visualization
+        
+        self.balance = self.initial_balance
+        self.net_worth = self.initial_balance
+        self.prev_net_worth = self.initial_balance
+        self.crypto_held = 0
+        self.crypto_sold = 0
+        self.crypto_bought = 0
+        if env_steps_size > 0: # used for training dataset
+            self.start_step = random.randint(self.lookback_window_size, self.df_total_steps - env_steps_size)
+            self.end_step = self.start_step + env_steps_size
+        else: # used for testing dataset
+            self.start_step = self.lookback_window_size
+            self.end_step = self.df_total_steps
+            
+        self.current_step = self.start_step
 
-		# Prices contains the OHCL values for the last five prices
-		self.observation_space = spaces.Box(
-			low=0, high=1, shape=(8, window_size), dtype=np.float16)
+        for i in reversed(range(self.lookback_window_size)):
+            current_step = self.current_step - i
+            self.orders_history.append([self.balance, self.net_worth, self.crypto_bought, self.crypto_sold, self.crypto_held])
+            self.market_history.append([self.df.loc[current_step, 'Open'],
+                                        self.df.loc[current_step, 'High'],
+                                        self.df.loc[current_step, 'Low'],
+                                        self.df.loc[current_step, 'Close'],
+                                        self.df.loc[current_step, 'Volume']
+                                        ])
 
-		self._position_history = []
-		self.frame_bound = frame_bound
-		self._prices = []
-		self._dates = []
-		self._profits = []
-		self.window_size = window_size
-		self.current_step = window_size
-		
-	def _next_observation(self):
-		# Get the stock data points for the last 6 days and scale to between 0-1
-		# print("self.current_step: ",self.current_step)
-		frame = np.array([
-			np.array(self.df['Open'][self.current_step-self.window_size : self.current_step] / MAX_SHARE_PRICE),
-			np.array(self.df['High'][self.current_step-self.window_size : self.current_step] / MAX_SHARE_PRICE),
-			np.array(self.df['Low'][self.current_step-self.window_size : self.current_step] / MAX_SHARE_PRICE),
-			np.array(self.df['Close'][self.current_step-self.window_size : self.current_step] / MAX_SHARE_PRICE),
-			np.array(self.df['Volume'][self.current_step-self.window_size : self.current_step] / MAX_NUM_SHARES),
-			np.array(self.df['SMA'][self.current_step-self.window_size : self.current_step] / MAX_SHARE_PRICE),
-			np.array(self.df['RSI'][self.current_step-self.window_size : self.current_step] / 100),
-			np.array(self.df['EMA'][self.current_step-self.window_size : self.current_step] / MAX_SHARE_PRICE),
-		])
-		# print("sample: ",np.array(self.df['Open'][self.current_step-6 : self.current_step] / MAX_SHARE_PRICE))
-		# print("frame: ",frame)
-		# Append additional data and scale each value to between 0-1
-		# obs = np.append(frame, [[
-		#     self.balance / MAX_ACCOUNT_BALANCE,
-		#     self.max_net_worth / MAX_ACCOUNT_BALANCE,
-		#     self.shares_held / MAX_NUM_SHARES,
-		#     self.cost_basis / MAX_SHARE_PRICE,
-		#     self.total_shares_sold / MAX_NUM_SHARES,
-		#     self.total_sales_value / (MAX_NUM_SHARES * MAX_SHARE_PRICE),
-		# ]], axis=0)
+        state = np.concatenate((self.market_history, self.orders_history), axis=1)
+        return state
 
-		return frame
+    # Get the data points for the given current_step
+    def _next_observation(self):
+        self.market_history.append([self.df.loc[self.current_step, 'Open'],
+                                    self.df.loc[self.current_step, 'High'],
+                                    self.df.loc[self.current_step, 'Low'],
+                                    self.df.loc[self.current_step, 'Close'],
+                                    self.df.loc[self.current_step, 'Volume']
+                                    ])
+        obs = np.concatenate((self.market_history, self.orders_history), axis=1)
+        return obs
 
-	def _take_action(self, action):
-		# Set the current price to a random price within the time step
-		current_price = random.uniform(
-			float(self.df["Open"][self.current_step:self.current_step+1]), float(self.df["Close"][self.current_step:self.current_step+1]))
+    # Execute one time step within the environment
+    def step(self, action):
+        self.crypto_bought = 0
+        self.crypto_sold = 0
+        self.current_step += 1
 
-		action_type = action[0]
-		amount = action[1]
+        # Set the current price to a random price between open and close
+        current_price = random.uniform(
+            self.df.loc[self.current_step, 'Open'],
+            self.df.loc[self.current_step, 'Close'])
+        Date = self.df.loc[self.current_step, 'Date'] # for visualization
+        High = self.df.loc[self.current_step, 'High'] # for visualization
+        Low = self.df.loc[self.current_step, 'Low'] # for visualization
+        
+        if action == 0: # Hold
+            pass
 
-		if action_type < 1:
-			# Buy amount % of balance in shares
-			total_possible = int(self.balance / current_price)
-			shares_bought = int(total_possible * amount)
-			prev_cost = self.cost_basis * self.shares_held
-			additional_cost = shares_bought * current_price
+        elif action == 1 and self.balance > self.initial_balance/100:
+            # Buy with 100% of current balance
+            self.crypto_bought = self.balance / current_price
+            self.balance -= self.crypto_bought * current_price
+            self.crypto_held += self.crypto_bought
+            self.trades.append({'Date' : Date, 'High' : High, 'Low' : Low, 'total': self.crypto_bought, 'type': "buy"})
 
-			self.balance -= additional_cost
-			try:
-				self.cost_basis = (
-					prev_cost + additional_cost) / (self.shares_held + shares_bought)
-			except:
-				self.cost_basis = 0
-			self.shares_held += shares_bought
-			self._position_history.append(0)
+        elif action == 2 and self.crypto_held>0:
+            # Sell 100% of current crypto held
+            self.crypto_sold = self.crypto_held
+            self.balance += self.crypto_sold * current_price
+            self.crypto_held -= self.crypto_sold
+            self.trades.append({'Date' : Date, 'High' : High, 'Low' : Low, 'total': self.crypto_sold, 'type': "sell"})
 
-		elif action_type < 2:
-			# Sell amount % of shares held
-			shares_sold = int(self.shares_held * amount)
-			self.balance += shares_sold * current_price
-			self.shares_held -= shares_sold
-			self.total_shares_sold += shares_sold
-			self.total_sales_value += shares_sold * current_price
-			self._position_history.append(1)
-		else:
-			self._position_history.append(2)
+        self.prev_net_worth = self.net_worth
+        self.net_worth = self.balance + self.crypto_held * current_price
 
-		self._prices.append(float(self.df["Close"][self.current_step:self.current_step+1]))
-		# self._dates.append(datetime.strptime(str(self.df["Date"][self.current_step:self.current_step+1].values[0]),'%d-%m-%Y').date())
-		self._dates.append(str(self.df["Date"][self.current_step:self.current_step+1].values[0]))
-		self.net_worth = self.balance + self.shares_held * current_price
+        self.orders_history.append([self.balance, self.net_worth, self.crypto_bought, self.crypto_sold, self.crypto_held])
+        #Write_to_file(Date, self.orders_history[-1])
 
-		if self.net_worth > self.max_net_worth:
-			self.max_net_worth = self.net_worth
+        # Calculate reward
+        reward = self.net_worth - self.prev_net_worth
 
-		if self.shares_held == 0:
-			self.cost_basis = 0
+        if self.net_worth <= self.initial_balance/2:
+            done = True
+        else:
+            done = False
 
-		profit = self.net_worth - INITIAL_ACCOUNT_BALANCE
-		self._profits.append(profit)
+        obs = self._next_observation()
+        
+        return obs, reward, done
 
-	def step(self, action):
-		# Execute one time step within the environment
-		self._take_action(action)
+    # render environment
+    def render(self, visualize = False):
+        #print(f'Step: {self.current_step}, Net Worth: {self.net_worth}')
+        if visualize:
+            Date = self.df.loc[self.current_step, 'Date']
+            Open = self.df.loc[self.current_step, 'Open']
+            Close = self.df.loc[self.current_step, 'Close']
+            High = self.df.loc[self.current_step, 'High']
+            Low = self.df.loc[self.current_step, 'Low']
+            Volume = self.df.loc[self.current_step, 'Volume']
 
-		self.current_step += 1
-		done = False
-		# print(f"self.current_step: {self.current_step}, len(df): {len(self.df)}")
-		if self.current_step >= len(self.df) or self.net_worth <= 0:
-			# print("STOP HERE")
-			# self._position_history = []
-			# self._prices = []
-			# self._dates = []
-			done = True
-			self.current_step = self.window_size
-
-		delay_modifier = (self.current_step / MAX_STEPS)
-		reward = (self.net_worth - INITIAL_ACCOUNT_BALANCE)*delay_modifier
-		# reward = self.balance * delay_modifier
-		# done = self.net_worth <= 0
-
-		obs = self._next_observation()
-		# print(f"observation : {obs}, reward : {reward}, done: {done}")
-
-		return obs, reward, done, {}
-
-	def reset(self):
-		# Reset the state of the environment to an initial state
-		self.balance = INITIAL_ACCOUNT_BALANCE
-		self.net_worth = INITIAL_ACCOUNT_BALANCE
-		self.max_net_worth = INITIAL_ACCOUNT_BALANCE
-		self.shares_held = 0
-		self.cost_basis = 0
-		self.total_shares_sold = 0
-		self.total_sales_value = 0
-
-		# Set the current step to a random point within the data frame
-		if self.check_test == False:
-			self.current_step = random.randint(
-				self.window_size, len(self.df.loc[:, 'Open'].values))
-		# self.current_step =len(self.df) - self.frame_bound - 6
-		else:
-			self.current_step = self.window_size
-
-		return self._next_observation()
-
-	def render(self, mode='human', close=False):
-		# Render the environment to the screen
-		profit = self.net_worth - INITIAL_ACCOUNT_BALANCE
-
-		print(f'Step: {self.current_step}')
-		print(f'Balance: {self.balance}')
-		print(
-			f'Shares held: {self.shares_held} (Total sold: {self.total_shares_sold})')
-		print(
-			f'Avg cost for held shares: {self.cost_basis} (Total sales value: {self.total_sales_value})')
-		print(
-			f'Net worth: {self.net_worth} (Max net worth: {self.max_net_worth})')
-		print(f'Profit: {profit}')
-
-	def render_all(self):
-		buy_signals, sell_signals, hold_signals = [], [], []
-		buy_prices, sell_prices, hold_prices = [], [], []
-		# print("_position_history: ",self._position_history)
-		# print("_prices: ",self._prices)
-		# print("_dates: ",self._dates)
-		for i in range(len(self._position_history)):
-			signal = self._position_history[i]
-			price = self._prices[i]
-			if signal == 0:
-				buy_signals.append(i)
-				buy_prices.append(price)
-			elif signal == 1:
-				sell_signals.append(i)
-				sell_prices.append(price)
-			else:
-				hold_signals.append(i)
-				hold_prices.append(price)
-		# plt.plot_date(self.df['Date'][6:6+len(self._prices)],self._prices)
-		# plt.plot_date(self.df['Date'][6:6+len(self._prices)],[i for i in range(len(self._dates))])
-		plt.plot(self._dates,self._prices)
-		plt.scatter(buy_signals, buy_prices,color='green', label='Buy signal')
-		plt.scatter(sell_signals, sell_prices,color='red', label='Sell signal')
-		plt.scatter(hold_signals, hold_prices,color='grey', label='Hold signal')
-		plt.gcf().autofmt_xdate()
-		plt.legend()
-		plt.show()
-	def render_profit(self):
-		buy_signals, sell_signals, hold_signals = [], [], []
-		buy_profits, sell_profits, hold_profits = [], [], []
-		for i in range(len(self._position_history)):
-			signal = self._position_history[i]
-			profit = self._profits[i]
-			if signal == 0:
-				buy_signals.append(i)
-				buy_profits.append(profit)
-			elif signal == 1:
-				sell_signals.append(i)
-				sell_profits.append(profit)
-			else:
-				hold_signals.append(i)
-				hold_profits.append(profit)
-		plt.plot(self._dates,self._profits)
-		plt.scatter(buy_signals, buy_profits,color='green', label='Buy signal')
-		plt.scatter(sell_signals, sell_profits,color='red', label='Sell signal')
-		plt.scatter(hold_signals, hold_profits,color='grey', label='Hold signal')
-		plt.xlabel('Dates')
-		plt.ylabel('Profits')
-		plt.gcf().autofmt_xdate()
-		plt.legend()
-		plt.show()
-
+            # Render the environment to the screen
+            self.visualization.render(Date, Open, High, Low, Close, Volume, self.net_worth, self.trades)
