@@ -25,6 +25,7 @@ class CustomEnv:
 		self.lookback_window_size = lookback_window_size
 		self.Render_range = Render_range # render range in visualization
 		self.episode_orders = 0
+		self.normalize_value = 100000
 		# Action space from 0 to 3, 0 is hold, 1 is buy, 2 is sell
 		self.action_space = np.array([0, 1, 2])
 
