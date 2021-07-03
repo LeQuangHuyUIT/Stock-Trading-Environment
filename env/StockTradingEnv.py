@@ -24,7 +24,7 @@ class CustomEnv:
         self.initial_balance = initial_balance
         self.lookback_window_size = lookback_window_size
         self.Render_range = Render_range # render range in visualization
-
+        self.episode_orders = 0
         # Action space from 0 to 3, 0 is hold, 1 is buy, 2 is sell
         self.action_space = np.array([0, 1, 2])
 
@@ -48,6 +48,9 @@ class CustomEnv:
         self.crypto_held = 0
         self.crypto_sold = 0
         self.crypto_bought = 0
+        self.episode_orders = 0
+        self.env_steps_size = env_steps_size
+        
         if env_steps_size > 0: # used for training dataset
             self.start_step = random.randint(self.lookback_window_size, self.df_total_steps - env_steps_size)
             self.end_step = self.start_step + env_steps_size
