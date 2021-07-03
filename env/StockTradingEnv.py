@@ -13,7 +13,8 @@ import numpy as np
 import random
 from collections import deque
 from utils import TradingGraph, Write_to_file
-
+# in colab
+# from env.utils import TradingGraph, Write_to_file
 class CustomEnv:
     # A custom Bitcoin trading environment
     def __init__(self, df, initial_balance=1000, lookback_window_size=50, Render_range = 100):
@@ -142,3 +143,5 @@ class CustomEnv:
 
             # Render the environment to the screen
             self.visualization.render(Date, Open, High, Low, Close, Volume, self.net_worth, self.trades)
+        else:
+            print(f'Step: {self.current_step}, Net Worth: {self.net_worth}')
