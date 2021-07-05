@@ -25,10 +25,10 @@ def AddIndicators(df):
     df["sma99"] = SMAIndicator(close=df["Close"], window=99, fillna=True).sma_indicator()
     
     # Add Bollinger Bands indicator
-    indicator_bb = BollingerBands(close=df["Close"], window=20, window_dev=2)
-    df['bb_bbm'] = indicator_bb.bollinger_mavg()
-    df['bb_bbh'] = indicator_bb.bollinger_hband()
-    df['bb_bbl'] = indicator_bb.bollinger_lband()
+    # indicator_bb = BollingerBands(close=df["Close"], window=20, window_dev=2)
+    # df['bb_bbm'] = indicator_bb.bollinger_mavg()
+    # df['bb_bbh'] = indicator_bb.bollinger_hband()
+    # df['bb_bbl'] = indicator_bb.bollinger_lband()
 
     # Add Parabolic Stop and Reverse (Parabolic SAR) indicator
     indicator_psar = PSARIndicator(high=df["High"], low=df["Low"], close=df["Close"], step=0.02, max_step=2, fillna=True)
