@@ -17,9 +17,10 @@ from env.utils import TradingGraph, Write_to_file
 # from utils import TradingGraph, Write_to_file
 class CustomEnv:
 	# A custom Bitcoin trading environment
-	def __init__(self, df, initial_balance=1000, lookback_window_size=50, Render_range=100, Show_reward=False, Show_indicators=False, normalize_value=40000):
+	def __init__(self, df, df_normalized, initial_balance=1000, lookback_window_size=50, Render_range=100, Show_reward=False, Show_indicators=False, normalize_value=40000):
 		# Define action space and state size and other custom parameters
-		self.df = df.dropna().reset_index()
+		self.df = df.reset_index()#.reset_index()#.dropna().copy().reset_index()
+		self.df_normalized = df_normalized.reset_index()#.reset_index()#.copy().dropna().reset_index()
 		self.df_total_steps = len(self.df)-1
 		self.initial_balance = initial_balance
 		self.lookback_window_size = lookback_window_size
@@ -33,9 +34,11 @@ class CustomEnv:
 		# Market history contains the OHCL values for the last lookback_window_size prices
 		self.market_history = deque(maxlen=self.lookback_window_size)
 
-		self.indicators_history = deque(maxlen=self.lookback_window_size)
-
 		self.normalize_value = normalize_value
+
+		self.fees = 0.001 # default Binance 0.1% order fees
+
+		self.columns = list(self.df_normalized.columns[2:])
 
 	# Reset the state of the environment to an initial state
 	def reset(self, env_steps_size = 0):
@@ -64,55 +67,24 @@ class CustomEnv:
 
 		for i in reversed(range(self.lookback_window_size)):
 			current_step = self.current_step - i
-			self.orders_history.append([self.balance, self.net_worth, self.crypto_bought, self.crypto_sold, self.crypto_held])
-
-			self.market_history.append([self.df.loc[current_step, 'Open'],
-										self.df.loc[current_step, 'High'],
-										self.df.loc[current_step, 'Low'],
-										self.df.loc[current_step, 'Close'],
-										self.df.loc[current_step, 'Volume'],
+			self.orders_history.append([self.balance / self.normalize_value,
+										self.net_worth / self.normalize_value,
+										self.crypto_bought / self.normalize_value,
+										self.crypto_sold / self.normalize_value,
+										self.crypto_held / self.normalize_value
 										])
 
-			self.indicators_history.append(
-				[self.df.loc[current_step, 'sma7'] / self.normalize_value,
-										self.df.loc[current_step, 'sma25'] / self.normalize_value,
-										self.df.loc[current_step, 'sma99'] / self.normalize_value,
-										# self.df.loc[current_step, 'bb_bbm'] / self.normalize_value,
-										# self.df.loc[current_step, 'bb_bbh'] / self.normalize_value,
-										# self.df.loc[current_step, 'bb_bbl'] / self.normalize_value,
-										self.df.loc[current_step, 'psar'] / self.normalize_value,
-										self.df.loc[current_step, 'MACD'] / 400,
-										self.df.loc[current_step, 'RSI'] / 100
-										])
+			# one line for loop to fill market history withing reset call
+			self.market_history.append([self.df_normalized.loc[current_step, column] for column in self.columns])
 			
-
-		state = np.concatenate((self.market_history, self.orders_history), axis=1) / self.normalize_value
-		state = np.concatenate((state, self.indicators_history), axis=1)
+		state = np.concatenate((self.orders_history, self.market_history), axis=1)
 
 		return state
 
 	# Get the data points for the given current_step
-	def _next_observation(self):
-		self.market_history.append([self.df.loc[self.current_step, 'Open'],
-									self.df.loc[self.current_step, 'High'],
-									self.df.loc[self.current_step, 'Low'],
-									self.df.loc[self.current_step, 'Close'],
-									self.df.loc[self.current_step, 'Volume'],
-									])
-
-		self.indicators_history.append([self.df.loc[self.current_step, 'sma7'] / self.normalize_value,
-									self.df.loc[self.current_step, 'sma25'] / self.normalize_value,
-									self.df.loc[self.current_step, 'sma99'] / self.normalize_value,
-									# self.df.loc[self.current_step, 'bb_bbm'] / self.normalize_value,
-									# self.df.loc[self.current_step, 'bb_bbh'] / self.normalize_value,
-									# self.df.loc[self.current_step, 'bb_bbl'] / self.normalize_value,
-									self.df.loc[self.current_step, 'psar'] / self.normalize_value,
-									self.df.loc[self.current_step, 'MACD'] / 400,
-									self.df.loc[self.current_step, 'RSI'] / 100
-									])
-		
-		obs = np.concatenate((self.market_history, self.orders_history), axis=1) / self.normalize_value
-		obs = np.concatenate((obs, self.indicators_history), axis=1)
+	def next_observation(self):
+		self.market_history.append([self.df_normalized.loc[self.current_step, column] for column in self.columns])
+		obs = np.concatenate((self.orders_history, self.market_history), axis=1)
 		
 		return obs
 
@@ -134,17 +106,19 @@ class CustomEnv:
 		if action == 0: # Hold
 			pass
 
-		elif action == 1 and self.balance > self.initial_balance/100:
+		elif action == 1 and self.balance > self.initial_balance*0.05:
 			# Buy with 100% of current balance
 			self.crypto_bought = self.balance / current_price
+			self.crypto_bought *= (1-self.fees) # substract fees
 			self.balance -= self.crypto_bought * current_price
 			self.crypto_held += self.crypto_bought
 			self.trades.append({'Date' : Date, 'High' : High, 'Low' : Low, 'total': self.crypto_bought, 'type': "buy", 'current_price': current_price})
 			self.episode_orders += 1
 
-		elif action == 2 and self.crypto_held>0:
+		elif action == 2 and self.crypto_held*current_price> self.initial_balance*0.05:
 			# Sell 100% of current crypto held
 			self.crypto_sold = self.crypto_held
+			self.crypto_sold *= (1-self.fees) # substract fees
 			self.balance += self.crypto_sold * current_price
 			self.crypto_held -= self.crypto_sold
 			self.trades.append({'Date' : Date, 'High' : High, 'Low' : Low, 'total': self.crypto_sold, 'type': "sell", 'current_price': current_price})
@@ -153,7 +127,12 @@ class CustomEnv:
 		self.prev_net_worth = self.net_worth
 		self.net_worth = self.balance + self.crypto_held * current_price
 
-		self.orders_history.append([self.balance, self.net_worth, self.crypto_bought, self.crypto_sold, self.crypto_held])
+		self.orders_history.append([self.balance / self.normalize_value,
+										self.net_worth / self.normalize_value,
+										self.crypto_bought / self.normalize_value,
+										self.crypto_sold / self.normalize_value,
+										self.crypto_held / self.normalize_value
+										])
 
 		# Receive calculated reward
 		reward = self.get_reward()
@@ -163,29 +142,24 @@ class CustomEnv:
 		else:
 			done = False
 
-		obs = self._next_observation()
+		obs = self.next_observation()
 		
 		return obs, reward, done
 
 	# Calculate reward
 	def get_reward(self):
-		self.punish_value += self.net_worth * 0.00001
 		if self.episode_orders > 1 and self.episode_orders > self.prev_episode_orders:
 			self.prev_episode_orders = self.episode_orders
 			if self.trades[-1]['type'] == "buy" and self.trades[-2]['type'] == "sell":
 				reward = self.trades[-2]['total']*self.trades[-2]['current_price'] - self.trades[-2]['total']*self.trades[-1]['current_price']
-				reward -= self.punish_value
-				self.punish_value = 0
 				self.trades[-1]["Reward"] = reward
 				return reward
 			elif self.trades[-1]['type'] == "sell" and self.trades[-2]['type'] == "buy":
 				reward = self.trades[-1]['total']*self.trades[-1]['current_price'] - self.trades[-2]['total']*self.trades[-2]['current_price']
-				reward -= self.punish_value
-				self.punish_value = 0
 				self.trades[-1]["Reward"] = reward
 				return reward
 		else:
-			return 0 - self.punish_value
+			return 0
 
 	# render environment
 	def render(self, visualize = False):
