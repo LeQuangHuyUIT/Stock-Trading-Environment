@@ -293,6 +293,7 @@ def Normalizing(df_original):
     column_names = df.columns.tolist()
     for column in column_names[1:]:
         # Logging and Differencing
+        df[column] = df[column] + 1e-8
         test = np.log(df[column]) - np.log(df[column].shift(1))
         if test[1:].isnull().any():
             df[column] = df[column] - df[column].shift(1)
@@ -301,6 +302,6 @@ def Normalizing(df_original):
         # Min Max Scaler implemented
         Min = df[column].min()
         Max = df[column].max()
-        df[column] = (df[column] - Min) / (Max - Min)
+        df[column] = (df[column] - Min) / (Max - Min + 1e-8)
 
     return df
