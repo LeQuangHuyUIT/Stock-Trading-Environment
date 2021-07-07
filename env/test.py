@@ -24,11 +24,11 @@ class CustomAgent:
 		self.action_space = np.array([0, 1, 2])
 
 		# folder to save models
-		self.log_name = datetime.now().strftime("%Y_%m_%d_%H_%M")+"_Crypto_trader"
+		self.log_name = datetime.now().strftime("%Y_%m_%d_%H_%M")+"_Stock_trader"
 		
 		# State size contains Market+Orders history for the last lookback_window_size steps
 		#self.state_size = (lookback_window_size, 10)
-		self.state_size = (lookback_window_size, 10+9) # 10 standard information +9 indicators
+		self.state_size = (lookback_window_size, 20) # 5 standard information +15 indicators
 
 		# Neural Networks part bellow
 		self.lr = lr
