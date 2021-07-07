@@ -13,14 +13,14 @@ import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, Flatten, Conv1D, MaxPooling1D, LSTM
 from tensorflow.keras import backend as K
-tf.config.experimental_run_functions_eagerly(True) # used for debuging and development
+#tf.config.experimental_run_functions_eagerly(True) # used for debuging and development
 tf.compat.v1.disable_eager_execution() # usually using this for fastest performance
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if len(gpus) > 0:
-	print(f'GPUs {gpus}')
-	try: tf.config.experimental.set_memory_growth(gpus[0], True)
-	except RuntimeError: pass
+    print(f'GPUs {gpus}')
+    try: tf.config.experimental.set_memory_growth(gpus[0], True)
+    except RuntimeError: pass
 
 class Shared_Model:
     def __init__(self, input_shape, action_space, lr, optimizer, model="Dense"):
