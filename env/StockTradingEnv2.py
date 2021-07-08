@@ -37,10 +37,10 @@ class CustomAgent:
 		self.action_space = np.array([0, 1, 2])
 
 		# folder to save models
-		self.log_name = datetime.now().strftime("%Y_%m_%d_%H_%M")+"_Crypto_trader"
+		self.log_name = datetime.now().strftime("%Y_%m_%d_%H_%M")+"Stock_trader"
 		
 		# State size contains Market+Orders history for the last lookback_window_size steps
-		self.state_size = (lookback_window_size, 20)
+		self.state_size = (lookback_window_size, 18)
 
 		# Neural Networks part bellow
 		self.lr = lr
@@ -204,16 +204,14 @@ class CustomEnv:
 										self.df.loc[current_step, 'Low'],
 										self.df.loc[current_step, 'Close'],
 										self.df.loc[current_step, 'Volume'],
-										self.df.loc[current_step, 'sma7'],
-										self.df.loc[current_step, 'trend_adx'],
-										self.df.loc[current_step, 'trend_psar_up_indicator'],
-										self.df.loc[current_step, 'trend_psar_down_indicator'],
-										self.df.loc[current_step, 'volatility_atr'],
-										self.df.loc[current_step, 'volatility_bbli'],
-										self.df.loc[current_step, 'volume_obv'],
-										self.df.loc[current_step, 'volume_nvi'],
-										self.df.loc[current_step, 'others_dr'],
-										self.df.loc[current_step, 'others_cr']
+										self.df.loc[current_step, 'SMA'],
+										self.df.loc[current_step, 'TENKAN'],
+										self.df.loc[current_step, 'KIJUN'],
+										self.df.loc[current_step, 'senkou_span_a'],
+										self.df.loc[current_step, 'SENKOU'],
+										self.df.loc[current_step, 'CHIKOU'],
+										self.df.loc[current_step, 'RSI'],
+										self.df.loc[current_step, 'EMA']
 										])
 
 		state = np.concatenate((self.market_history, self.orders_history), axis=1)
@@ -226,16 +224,14 @@ class CustomEnv:
 									self.df.loc[self.current_step, 'Low'],
 									self.df.loc[self.current_step, 'Close'],
 									self.df.loc[self.current_step, 'Volume'],
-									self.df.loc[self.current_step, 'sma7'],
-									self.df.loc[self.current_step, 'trend_adx'],
-									self.df.loc[self.current_step, 'trend_psar_up_indicator'],
-									self.df.loc[self.current_step, 'trend_psar_down_indicator'],
-									self.df.loc[self.current_step, 'volatility_atr'],
-									self.df.loc[self.current_step, 'volatility_bbli'],
-									self.df.loc[self.current_step, 'volume_obv'],
-									self.df.loc[self.current_step, 'volume_nvi'],
-									self.df.loc[self.current_step, 'others_dr'],
-									self.df.loc[self.current_step, 'others_cr']
+									self.df.loc[self.current_step, 'SMA'],
+									self.df.loc[self.current_step, 'TENKAN'],
+									self.df.loc[self.current_step, 'KIJUN'],
+									self.df.loc[self.current_step, 'senkou_span_a'],
+									self.df.loc[self.current_step, 'SENKOU'],
+									self.df.loc[self.current_step, 'CHIKOU'],
+									self.df.loc[self.current_step, 'RSI'],
+									self.df.loc[self.current_step, 'EMA']
 									])
 		obs = np.concatenate((self.market_history, self.orders_history), axis=1)
 		return obs
