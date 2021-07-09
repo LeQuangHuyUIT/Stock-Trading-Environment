@@ -276,7 +276,8 @@ class CustomEnv:
 		self.orders_history.append([self.balance, self.net_worth, self.crypto_bought, self.crypto_sold, self.crypto_held])
 
 		# Receive calculated reward
-		reward = self.get_reward()
+		# reward = self.get_reward()
+		reward = self.net_worth - self.prev_net_worth
 
 		if self.net_worth <= self.initial_balance/2:
 			done = True
