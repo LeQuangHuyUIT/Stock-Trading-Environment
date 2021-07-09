@@ -19,11 +19,11 @@ from tensorboardX import SummaryWriter
 from tensorflow.keras.optimizers import Adam, RMSprop
 
 #in colab
-from env.model import Actor_Model, Critic_Model, Shared_Model
-from env.utils import TradingGraph, Write_to_file
+# from env.model import Actor_Model, Critic_Model, Shared_Model
+# from env.utils import TradingGraph, Write_to_file
 
-# from model import Actor_Model, Critic_Model, Shared_Model
-# from utils import TradingGraph, Write_to_file
+from model import Actor_Model, Critic_Model, Shared_Model
+from utils import TradingGraph, Write_to_file
 import matplotlib.pyplot as plt
 from datetime import datetime
 
@@ -415,27 +415,27 @@ def test_agent(env, agent, visualize=True, test_episodes=10, folder="", name="Cr
 
 
 if __name__ == "__main__":            
-	df = pd.read_csv('./pricedata.csv')
+	df = pd.read_csv('/home/huyle/MyGit/Stock-Trading-Environment/data/fpt_indicators.csv')
 	df = df.sort_values('Date')
 
-	lookback_window_size = 50
-	test_window = 720 # 30 days 
+	lookback_window_size = 10
+	test_window = 30 # 30 days 
 	train_df = df[:-test_window-lookback_window_size]
 	test_df = df[-test_window-lookback_window_size:]
 
-	agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.00001, epochs=1, optimizer=Adam, batch_size = 32, model="Dense")
-	#train_env = CustomEnv(train_df, lookback_window_size=lookback_window_size)
-	#train_agent(train_env, agent, visualize=False, train_episodes=50000, training_batch_size=500)
-	test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
-	test_agent(test_env, agent, visualize=False, test_episodes=10, folder="2021_01_11_13_32_Crypto_trader", name="1277.39_Crypto_trader", comment="")
+	# agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.0001, epochs=1, optimizer=Adam, batch_size = 32, model="Dense")
+	# #train_env = CustomEnv(train_df, lookback_window_size=lookback_window_size)
+	# #train_agent(train_env, agent, visualize=False, train_episodes=50000, training_batch_size=500)
+	# test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
+	# test_agent(test_env, agent, visualize=False, test_episodes=10, folder="2021_01_11_13_32_Crypto_trader", name="1277.39_Crypto_trader", comment="")
 
-	agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.00001, epochs=1, optimizer=Adam, batch_size = 32, model="CNN")
+	agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.0001, epochs=1, optimizer=Adam, batch_size = 32, model="CNN")
 	test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
-	test_agent(test_env, agent, visualize=False, test_episodes=10, folder="2021_01_11_23_48_Crypto_trader", name="1772.66_Crypto_trader", comment="")
-	test_agent(test_env, agent, visualize=False, test_episodes=10, folder="2021_01_11_23_48_Crypto_trader", name="1377.86_Crypto_trader", comment="")
+	test_agent(test_env, agent, visualize=False, test_episodes=10, folder="weights", name="2021_07_08_Crypto_trader", comment="2021_07_08_CNN")
+	# test_agent(test_env, agent, visualize=False, test_episodes=10, folder="2021_01_11_23_48_Crypto_trader", name="1377.86_Crypto_trader", comment="")
 
-	agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.00001, epochs=1, optimizer=Adam, batch_size = 128, model="LSTM")
-	test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
-	test_agent(test_env, agent, visualize=False, test_episodes=10, folder="2021_01_11_23_43_Crypto_trader", name="1076.27_Crypto_trader", comment="")
+	# agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.00001, epochs=1, optimizer=Adam, batch_size = 128, model="LSTM")
+	# test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
+	# test_agent(test_env, agent, visualize=False, test_episodes=10, folder="2021_01_11_23_43_Crypto_trader", name="1076.27_Crypto_trader", comment="")
 
 	
