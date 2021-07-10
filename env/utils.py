@@ -121,14 +121,14 @@ class TradingGraph:
         # I use tight_layout to replace plt.subplots_adjust
         self.fig.tight_layout()
 
-        """Display image with matplotlib - interrupting other tasks"""
-        # Show the graph without blocking the rest of the program
-        plt.show(block=False)
-        # Necessary to view frames before they are unrendered
-        plt.pause(0.001)
+        # """Display image with matplotlib - interrupting other tasks"""
+        # # Show the graph without blocking the rest of the program
+        # plt.show(block=False)
+        # # Necessary to view frames before they are unrendered
+        # plt.pause(0.001)
 
         """Display image with OpenCV - no interruption"""
-        """
+        
         # redraw the canvas
         self.fig.canvas.draw()
         # convert canvas to image
@@ -140,8 +140,10 @@ class TradingGraph:
 
         # display image with OpenCV or any operation you like
         cv2.imshow("Bitcoin trading bot",image)
-
+        
         if cv2.waitKey(25) & 0xFF == ord("q"):
             cv2.destroyAllWindows()
             return
-        """
+        else:
+            # print("yes")
+            return img

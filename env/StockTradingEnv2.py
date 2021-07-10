@@ -26,6 +26,7 @@ from model import Actor_Model, Critic_Model, Shared_Model
 from utils import TradingGraph, Write_to_file
 import matplotlib.pyplot as plt
 from datetime import datetime
+import cv2 
 
 class CustomAgent:
 	# A custom Bitcoin trading agent
@@ -320,7 +321,7 @@ class CustomEnv:
 			Volume = self.df.loc[self.current_step, 'Volume']
 
 			# Render the environment to the screen
-			self.visualization.render(Date, Open, High, Low, Close, Volume, self.net_worth, self.trades)
+			return self.visualization.render(Date, Open, High, Low, Close, Volume, self.net_worth, self.trades)
 
 		
 def Random_games(env, visualize, test_episodes = 50, comment=""):
@@ -395,7 +396,7 @@ def test_agent(env, agent, visualize=True, test_episodes=10, folder="", name="Cr
 	for episode in range(test_episodes):
 		state = env.reset()
 		while True:
-			env.render(visualize)
+			img = env.render(visualize)
 			action, prediction = agent.act(state)
 			state, reward, done = env.step(action)
 			if env.current_step == env.end_step:
@@ -413,10 +414,12 @@ def test_agent(env, agent, visualize=True, test_episodes=10, folder="", name="Cr
 		results.write(f'{current_date}, {name}, test episodes:{test_episodes}')
 		results.write(f', net worth:{average_net_worth/(episode+1)}, orders per episode:{average_orders/test_episodes}')
 		results.write(f', no profit episodes:{no_profit_episodes}, model: {agent.model}, comment: {comment}\n')
+	return img
 
 
 if __name__ == "__main__":            
-	df = pd.read_csv('/home/huyle/MyGit/Stock-Trading-Environment/data/fpt_indicators.csv')
+	df = pd.read_csv('/data/vic_indicators.csv')
+	df['Date'] = df['Date'].apply(lambda x: datetime.strptime(str(x),'%Y%m%d'))
 	df = df.sort_values('Date')
 
 	lookback_window_size = 10
@@ -424,19 +427,11 @@ if __name__ == "__main__":
 	train_df = df[:-test_window-lookback_window_size]
 	test_df = df[-test_window-lookback_window_size:]
 
-	# agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.0001, epochs=1, optimizer=Adam, batch_size = 32, model="Dense")
-	# #train_env = CustomEnv(train_df, lookback_window_size=lookback_window_size)
-	# #train_agent(train_env, agent, visualize=False, train_episodes=50000, training_batch_size=500)
-	# test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
-	# test_agent(test_env, agent, visualize=False, test_episodes=10, folder="2021_01_11_13_32_Crypto_trader", name="1277.39_Crypto_trader", comment="")
 
 	agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.0001, epochs=1, optimizer=Adam, batch_size = 32, model="CNN")
 	test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
-	test_agent(test_env, agent, visualize=False, test_episodes=10, folder="weights", name="2021_07_08_Crypto_trader", comment="2021_07_08_CNN")
-	# test_agent(test_env, agent, visualize=False, test_episodes=10, folder="2021_01_11_23_48_Crypto_trader", name="1377.86_Crypto_trader", comment="")
-
-	# agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.00001, epochs=1, optimizer=Adam, batch_size = 128, model="LSTM")
-	# test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
-	# test_agent(test_env, agent, visualize=False, test_episodes=10, folder="2021_01_11_23_43_Crypto_trader", name="1076.27_Crypto_trader", comment="")
-
+	img = test_agent(test_env, agent, visualize=True, test_episodes=1, folder="weights", name="_Crypto_trader", comment="2021_07_09_CNN_vic")
+	cv2.imshow('res', img)
+	cv2.waitKey(0);
+	
 	
