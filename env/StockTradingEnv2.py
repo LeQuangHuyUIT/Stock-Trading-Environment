@@ -19,11 +19,11 @@ from tensorboardX import SummaryWriter
 from tensorflow.keras.optimizers import Adam, RMSprop
 
 #in colab
-# from env.model import Actor_Model, Critic_Model, Shared_Model
-# from env.utils import TradingGraph, Write_to_file
+from env.model import Actor_Model, Critic_Model, Shared_Model
+from env.utils import TradingGraph, Write_to_file
 
-from model import Actor_Model, Critic_Model, Shared_Model
-from utils import TradingGraph, Write_to_file
+# from model import Actor_Model, Critic_Model, Shared_Model
+# from utils import TradingGraph, Write_to_file
 import matplotlib.pyplot as plt
 from datetime import datetime
 import cv2 
