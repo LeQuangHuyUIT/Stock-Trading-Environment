@@ -19,11 +19,11 @@ from tensorboardX import SummaryWriter
 from tensorflow.keras.optimizers import Adam, RMSprop
 
 #in colab
-# from env.model import Actor_Model, Critic_Model, Shared_Model
-# from env.utils import TradingGraph, Write_to_file
+from env.model import Actor_Model, Critic_Model, Shared_Model
+from env.utils import TradingGraph, Write_to_file
 
-from model import Actor_Model, Critic_Model, Shared_Model
-from utils import TradingGraph, Write_to_file
+# from model import Actor_Model, Critic_Model, Shared_Model
+# from utils import TradingGraph, Write_to_file
 import matplotlib.pyplot as plt
 from datetime import datetime
 import cv2 
@@ -244,10 +244,10 @@ class CustomEnv:
 		self.current_step += 1
 
 		# Set the current price to a random price between open and close
-		#current_price = random.uniform(
-		#    self.df.loc[self.current_step, 'Open'],
-		#    self.df.loc[self.current_step, 'Close'])
-		current_price = self.df.loc[self.current_step, 'Open']
+		current_price = random.uniform(
+		   self.df.loc[self.current_step, 'Open'],
+		   self.df.loc[self.current_step, 'Close'])
+		# current_price = self.df.loc[self.current_step, 'Open']
 		Date = self.df.loc[self.current_step, 'Date'] # for visualization
 		High = self.df.loc[self.current_step, 'High'] # for visualization
 		Low = self.df.loc[self.current_step, 'Low'] # for visualization
