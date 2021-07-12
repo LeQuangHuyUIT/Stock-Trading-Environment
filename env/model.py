@@ -29,6 +29,9 @@ class Shared_Model:
 
         # Shared CNN layers:
         if model=="CNN":
+            # X = Conv1D(filters=64, kernel_size=6, padding="same", activation="tanh")(X_input)
+            # X = MaxPooling1D(pool_size=2)(X)
+            # X = Conv1D(filters=32, kernel_size=3, padding="same", activation="tanh")(X)
             X = Conv1D(filters=64, kernel_size=6, padding="same", activation="tanh")(X_input)
             X = MaxPooling1D(pool_size=2)(X)
             X = Conv1D(filters=32, kernel_size=3, padding="same", activation="tanh")(X)

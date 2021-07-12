@@ -13,3 +13,5 @@
 2021-07-10 09:34, fpt_Crypto_trader, test episodes:1, net worth:1097.7611839046008, orders per episode:3.0, no profit episodes:0, model: CNN, comment: 2021_07_09_CNN_fpt
 2021-07-10 09:34, fpt_Crypto_trader, test episodes:1, net worth:1097.7611839046008, orders per episode:3.0, no profit episodes:0, model: CNN, comment: 2021_07_09_CNN_fpt
 2021-07-10 10:05, _Crypto_trader, test episodes:1, net worth:1000.0, orders per episode:0.0, no profit episodes:0, model: CNN, comment: 2021_07_09_CNN_vic
+2021-07-11 09:42, 1142.10_Crypto_trader, test episodes:1, net worth:963.1147540983607, orders per episode:1.0, no profit episodes:1, model: CNN, comment: 2021_07_09_CNN_vic
+2021-07-11 09:43, 1142.10_Crypto_trader, test episodes:1, net worth:963.1147540983607, orders per episode:1.0, no profit episodes:1, model: CNN, comment: 2021_07_09_CNN_vic

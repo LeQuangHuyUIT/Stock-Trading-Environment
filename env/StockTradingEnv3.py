@@ -418,7 +418,7 @@ def test_agent(env, agent, visualize=True, test_episodes=10, folder="", name="Cr
 
 
 if __name__ == "__main__":            
-	df = pd.read_csv('/data/vic_indicators.csv')
+	df = pd.read_csv('/home/huyle/MyGit/Stock-Trading-Environment/data/vic_indicators.csv')
 	df['Date'] = df['Date'].apply(lambda x: datetime.strptime(str(x),'%Y%m%d'))
 	df = df.sort_values('Date')
 
@@ -430,7 +430,7 @@ if __name__ == "__main__":
 
 	agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.0001, epochs=1, optimizer=Adam, batch_size = 32, model="CNN")
 	test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
-	img = test_agent(test_env, agent, visualize=True, test_episodes=1, folder="weights", name="_Crypto_trader", comment="2021_07_09_CNN_vic")
+	img = test_agent(test_env, agent, visualize=True, test_episodes=1, folder="/home/huyle/MyGit/Stock-Trading-Environment/test_weight", name="1142.10_Crypto_trader", comment="2021_07_09_CNN_vic")
 	cv2.imshow('res', img)
 	cv2.waitKey(0);
 	
