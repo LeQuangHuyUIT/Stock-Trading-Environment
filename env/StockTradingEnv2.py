@@ -17,13 +17,13 @@ import random
 from collections import deque
 from tensorboardX import SummaryWriter
 from tensorflow.keras.optimizers import Adam, RMSprop
-
+from keras.models import Model, load_model
 #in colab
-from env.model import Actor_Model, Critic_Model, Shared_Model
-from env.utils import TradingGraph, Write_to_file
+# from env.model import Actor_Model, Critic_Model, Shared_Model
+# from env.utils import TradingGraph, Write_to_file
 
-# from model import Actor_Model, Critic_Model, Shared_Model
-# from utils import TradingGraph, Write_to_file
+from model import Actor_Model, Critic_Model, Shared_Model, PGModel
+from utils import TradingGraph, Write_to_file
 import matplotlib.pyplot as plt
 from datetime import datetime
 import cv2 
@@ -152,7 +152,66 @@ class CustomAgent:
 		self.Actor.Actor.load_weights(os.path.join(folder, f"{name}_Actor.h5"))
 		self.Critic.Critic.load_weights(os.path.join(folder, f"{name}_Critic.h5"))
 
-		
+class PGAgent:
+    def __init__(self, env_name ,lr):
+        # Initialization
+        # Environment and PG parameters
+        
+        self.action_size = 3
+        self.lr = lr
+        self.env_name = env_name
+
+        # Instantiate games and plot memory
+        self.states, self.actions, self.rewards = [], [], []
+        self.scores, self.episodes, self.average = [], [], []
+        self.model = 'CNN'
+
+        self.Save_Path = 'Models'
+        self.state_size = (10, 18)
+        
+        if not os.path.exists(self.Save_Path): os.makedirs(self.Save_Path)
+        self.path = '{}_PG_{}'.format(self.env_name, self.lr)
+        self.Model_name = os.path.join(self.Save_Path, self.path)
+
+        # Create Actor network model
+        self.Actor = PGModel(input_shape=self.state_size, action_space = self.action_size, lr=self.lr)
+
+    def remember(self, state, action, reward):
+        # store episode actions to memory
+        self.states.append(state)
+        action_onehot = np.zeros([self.action_size])
+        action_onehot[action] = 1
+        self.actions.append(action_onehot)
+        self.rewards.append(reward)
+
+    
+    def act(self, state):
+        # Use the network to predict the next action to take, using the model
+        prediction = self.Actor.predict(np.expand_dims(state, axis=0))[0]
+        action = np.random.choice(self.action_size, p=prediction)
+        return action, prediction
+
+    def discount_rewards(self, reward):
+        # Compute the gamma-discounted rewards over an episode
+        gamma = 0.99    # discount rate
+        running_add = 0
+        discounted_r = np.zeros_like(reward)
+        for i in reversed(range(0,len(reward))):
+            if reward[i] != 0: # reset the sum, since this was a game boundary (pong specific!)
+                running_add = 0
+            running_add = running_add * gamma + reward[i]
+            discounted_r[i] = running_add
+
+        discounted_r -= np.mean(discounted_r) # normalizing the result
+        discounted_r /= np.std(discounted_r) # divide by standard deviation
+        return discounted_r
+        
+    def load(self, folder, name):
+        self.Actor = load_model(folder+name, compile=False)
+
+    def save(self):
+        self.Actor.save(self.Model_name + '.h5')
+
 class CustomEnv:
 	# A custom Bitcoin trading environment
 	def __init__(self, df, initial_balance=1000, lookback_window_size=50, Render_range=100, Show_reward=False, normalize_value=40000):
@@ -416,21 +475,51 @@ def test_agent(env, agent, visualize=True, test_episodes=10, folder="", name="Cr
 		results.write(f', no profit episodes:{no_profit_episodes}, model: {agent.model}, comment: {comment}\n')
 	return img
 
+def train_agent_PG(env, agent, train_episodes = 50, training_batch_size=500):
+    total_average = deque(maxlen=100) # save recent 100 episodes net worth
+    best_average = 0
+    for e in range(train_episodes):
+        state = env.reset(training_batch_size)
+        done, score, SAVING = False, 0, ''
+ # used to track best average net worth 
+        for t in range(training_batch_size):
+            #self.env.render()
+            # Actor picks an action
+            action, _ = agent.act(state)
+            # Retrieve new state, reward, and whether the state is terminal
+            next_state, reward, done = env.step(action)
+            # Memorize (state, action, reward) for training
+            agent.remember(state, action, reward)
+            # Update current state
+            state = next_state
+            score += reward
+
+        total_average.append(env.net_worth)
+        average = np.average(total_average)
+        print("episode: {:<5} net worth {:<7.2f} average: {:<7.2f}".format(e, env.net_worth, average))
+        if e > len(total_average):
+            if best_average < average:
+                best_average = average
+                print('Save model')
+                agent.save()
 
 if __name__ == "__main__":            
-	df = pd.read_csv('/data/vic_indicators.csv')
+	df = pd.read_csv('/home/huyle/MyGit/Stock-Trading-Environment/data/vic_indicators.csv')
 	df['Date'] = df['Date'].apply(lambda x: datetime.strptime(str(x),'%Y%m%d'))
 	df = df.sort_values('Date')
 
 	lookback_window_size = 10
-	test_window = 30 # 30 days 
+	test_window = 60 # 60 turn 
 	train_df = df[:-test_window-lookback_window_size]
 	test_df = df[-test_window-lookback_window_size:]
 
-
+	agent_PG = PGAgent("fpt_agent",0.00001)
 	agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.0001, epochs=1, optimizer=Adam, batch_size = 32, model="CNN")
+
+
 	test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
-	img = test_agent(test_env, agent, visualize=True, test_episodes=1, folder="weights", name="_Crypto_trader", comment="2021_07_09_CNN_vic")
+
+	img = test_agent(test_env, agent_PG, True, 1, "/home/huyle/MyGit/Stock-Trading-Environment/weights", "/fpt_agent_PG_1e-05.h5")
 	cv2.imshow('res', img)
 	cv2.waitKey(0);
 	

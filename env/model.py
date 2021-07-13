@@ -10,6 +10,7 @@
 #================================================================
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.optimizers import Adam, RMSprop
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, Flatten, Conv1D, MaxPooling1D, LSTM
 from tensorflow.keras import backend as K
@@ -167,3 +168,25 @@ class Critic_Model:
 
     def critic_predict(self, state):
         return self.Critic.predict([state, np.zeros((state.shape[0], 1))])
+
+def PGModel(input_shape, action_space, lr):
+    X_input = Input(input_shape)
+
+    X = Conv1D(filters=64, kernel_size=6, padding="same", activation="tanh")(X_input)
+    X = MaxPooling1D(pool_size=2)(X)
+    X = Conv1D(filters=32, kernel_size=3, padding="same", activation="tanh")(X)
+    X = MaxPooling1D(pool_size=2)(X)
+    X = Flatten(input_shape=input_shape)(X_input)
+
+    X = Dense(512, activation="elu", kernel_initializer='he_uniform')(X)
+    X = Dense(256, activation="elu", kernel_initializer='he_uniform')(X)
+    X = Dense(64, activation="elu", kernel_initializer='he_uniform')(X)
+
+    action = Dense(action_space, activation="softmax", kernel_initializer='he_uniform')(X)
+
+    Actor = Model(inputs = X_input, outputs = action)
+    Actor.compile(loss='categorical_crossentropy', optimizer=RMSprop(lr=lr))
+
+    return Actor
+
+

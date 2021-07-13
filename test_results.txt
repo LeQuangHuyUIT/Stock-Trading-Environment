@@ -15,3 +15,11 @@
 2021-07-10 10:05, _Crypto_trader, test episodes:1, net worth:1000.0, orders per episode:0.0, no profit episodes:0, model: CNN, comment: 2021_07_09_CNN_vic
 2021-07-11 09:42, 1142.10_Crypto_trader, test episodes:1, net worth:963.1147540983607, orders per episode:1.0, no profit episodes:1, model: CNN, comment: 2021_07_09_CNN_vic
 2021-07-11 09:43, 1142.10_Crypto_trader, test episodes:1, net worth:963.1147540983607, orders per episode:1.0, no profit episodes:1, model: CNN, comment: 2021_07_09_CNN_vic
+2021-07-13 08:28, 1677.89_Crypto_fptCNN_trader, test episodes:1, net worth:934.1579308801438, orders per episode:1.0, no profit episodes:1, model: CNN, comment: 2021_07_13_CNN_vic
+2021-07-13 08:29, 1677.89_Crypto_fptCNN_trader, test episodes:1, net worth:1367.5183626856924, orders per episode:1.0, no profit episodes:0, model: CNN, comment: 2021_07_13_CNN_vic
+2021-07-13 08:31, 2444.00_Crypto_vicCNN_trader, test episodes:1, net worth:1326.9719046405885, orders per episode:1.0, no profit episodes:0, model: CNN, comment: 2021_07_13_CNN_vic_with_vicweight
+2021-07-13 08:32, 2444.00_Crypto_vicCNN_trader, test episodes:1, net worth:923.2405314079945, orders per episode:1.0, no profit episodes:1, model: CNN, comment: 2021_07_13_CNN_vic_with_vicweight
+2021-07-13 08:48, 2444.00_Crypto_vicCNN_trader, test episodes:1, net worth:923.0938944503372, orders per episode:1.0, no profit episodes:1, model: CNN, comment: 2021_07_13_CNN_vic_with_vicweight
+2021-07-13 11:28, /fpt_agent_PG_1e-05.h5, test episodes:10, net worth:1257.0720237278317, orders per episode:4.4, no profit episodes:0, model: CNN, comment: 
+2021-07-13 11:29, /fpt_agent_PG_1e-05.h5, test episodes:1, net worth:1293.2442188459413, orders per episode:5.0, no profit episodes:0, model: CNN, comment: 
+2021-07-13 11:30, /fpt_agent_PG_1e-05.h5, test episodes:1, net worth:924.0224365394193, orders per episode:3.0, no profit episodes:1, model: CNN, comment: 
