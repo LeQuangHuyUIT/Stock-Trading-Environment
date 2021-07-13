@@ -19,11 +19,11 @@ from tensorboardX import SummaryWriter
 from tensorflow.keras.optimizers import Adam, RMSprop
 from keras.models import Model, load_model
 #in colab
-from env.model import Actor_Model, Critic_Model, Shared_Model,PGModel
-from env.utils import TradingGraph, Write_to_file
+# from env.model import Actor_Model, Critic_Model, Shared_Model,PGModel
+# from env.utils import TradingGraph, Write_to_file
 
-# from model import Actor_Model, Critic_Model, Shared_Model, PGModel
-# from utils import TradingGraph, Write_to_file
+from model import Actor_Model, Critic_Model, Shared_Model, PGModel
+from utils import TradingGraph, Write_to_file
 import matplotlib.pyplot as plt
 from datetime import datetime
 import cv2 
@@ -513,13 +513,13 @@ if __name__ == "__main__":
 	train_df = df[:-test_window-lookback_window_size]
 	test_df = df[-test_window-lookback_window_size:]
 
-	agent_PG = PGAgent("fpt_agent",0.00001)
+	agent_PG = PGAgent("vic_agent",0.00001)
 	agent = CustomAgent(lookback_window_size=lookback_window_size, lr=0.0001, epochs=1, optimizer=Adam, batch_size = 32, model="CNN")
 
 
 	test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
 
-	img = test_agent(test_env, agent_PG, True, 1, "/home/huyle/MyGit/Stock-Trading-Environment/weights", "/fpt_agent_PG_1e-05.h5")
+	img = test_agent(test_env, agent_PG, True, 1, "/home/huyle/MyGit/Stock-Trading-Environment/weights", "/vic_agent_PG_1e-05.h5")
 	cv2.imshow('res', img)
 	cv2.waitKey(0);
 	

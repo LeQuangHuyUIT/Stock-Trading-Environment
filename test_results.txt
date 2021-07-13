@@ -23,3 +23,5 @@
 2021-07-13 11:28, /fpt_agent_PG_1e-05.h5, test episodes:10, net worth:1257.0720237278317, orders per episode:4.4, no profit episodes:0, model: CNN, comment: 
 2021-07-13 11:29, /fpt_agent_PG_1e-05.h5, test episodes:1, net worth:1293.2442188459413, orders per episode:5.0, no profit episodes:0, model: CNN, comment: 
 2021-07-13 11:30, /fpt_agent_PG_1e-05.h5, test episodes:1, net worth:924.0224365394193, orders per episode:3.0, no profit episodes:1, model: CNN, comment: 
+2021-07-13 13:54, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:1020.5726778132024, orders per episode:15.0, no profit episodes:0, model: CNN, comment: 
+2021-07-13 13:54, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:993.0794911194296, orders per episode:15.0, no profit episodes:1, model: CNN, comment: 
