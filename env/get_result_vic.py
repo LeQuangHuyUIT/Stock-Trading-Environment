@@ -34,4 +34,6 @@ cv2.imwrite("VIC_PG.jpg", img_pg)
 img_DQN = agent_DQN_fpt.test(save_folder="/home/huyle/MyGit/Stock-Trading-Environment/weights", \
 	filename= "VIC_DQN_Episode(1023).h5", visualize= True)
 
+# cv2.imwrite("sample.jpg", img_DQN)
+
 cv2.imwrite("VIC_DQN.jpg", img_DQN)

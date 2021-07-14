@@ -44,7 +44,7 @@ class TradingGraph:
         # close all plots if there are open
         plt.close('all')
         # figsize attribute allows us to specify the width and height of a figure in unit inches
-        self.fig = plt.figure(figsize=(16,8)) 
+        self.fig = plt.figure(figsize=(8,4)) 
 
         # Create top subplot for price axis
         self.ax1 = plt.subplot2grid((6,1), (0,0), rowspan=5, colspan=1)
@@ -114,9 +114,9 @@ class TradingGraph:
                         pass
 
         # we need to set layers every step, because we are clearing subplots every step
-        self.ax2.set_xlabel('Date')
-        self.ax1.set_ylabel('Price')
-        self.ax3.set_ylabel('Balance')
+        self.ax2.set_xlabel('Date', fontsize= 20)
+        self.ax1.set_ylabel('Price', fontsize= 20)
+        self.ax3.set_ylabel('Balance', fontsize= 20)
         self.ax3.yaxis.set_ticks_position("right")
         # I use tight_layout to replace plt.subplots_adjust
         self.fig.tight_layout()
