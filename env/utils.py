@@ -74,7 +74,7 @@ class TradingGraph:
         
         # Clear the frame rendered last step
         self.ax1.clear()
-        candlestick_ohlc(self.ax1, self.render_data, width=0.8/24, colorup='green', colordown='red', alpha=0.8)
+        candlestick_ohlc(self.ax1, self.render_data, width=0.5, colorup='green', colordown='red', alpha=0.8)
 
         # Put all dates to one list and fill ax2 sublot with volume
         Date_Render_range = [i[0] for i in self.render_data]
@@ -117,7 +117,7 @@ class TradingGraph:
         self.ax2.set_xlabel('Date')
         self.ax1.set_ylabel('Price')
         self.ax3.set_ylabel('Balance')
-
+        self.ax3.yaxis.set_ticks_position("right")
         # I use tight_layout to replace plt.subplots_adjust
         self.fig.tight_layout()
 
@@ -146,4 +146,4 @@ class TradingGraph:
             return
         else:
             # print("yes")
-            return img
+            return image

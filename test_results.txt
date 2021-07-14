@@ -25,3 +25,26 @@
 2021-07-13 11:30, /fpt_agent_PG_1e-05.h5, test episodes:1, net worth:924.0224365394193, orders per episode:3.0, no profit episodes:1, model: CNN, comment: 
 2021-07-13 13:54, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:1020.5726778132024, orders per episode:15.0, no profit episodes:0, model: CNN, comment: 
 2021-07-13 13:54, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:993.0794911194296, orders per episode:15.0, no profit episodes:1, model: CNN, comment: 
+2021-07-13 16:26, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:1025.9003255642301, orders per episode:21.0, no profit episodes:0, model: CNN, comment: 
+2021-07-13 19:51, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:1012.3222272319526, orders per episode:19.0, no profit episodes:0, model: CNN, comment: 
+2021-07-13 19:52, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:977.665811903045, orders per episode:19.0, no profit episodes:1, model: CNN, comment: 
+2021-07-13 19:52, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:991.8238735067301, orders per episode:19.0, no profit episodes:1, model: CNN, comment: 
+2021-07-13 19:56, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:934.2681329489079, orders per episode:17.0, no profit episodes:1, model: CNN, comment: 
+2021-07-13 19:57, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:980.4951462905615, orders per episode:19.0, no profit episodes:1, model: CNN, comment: 
+2021-07-13 20:19, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:956.4604400054599, orders per episode:19.0, no profit episodes:1, model: CNN, comment: 
+2021-07-13 20:21, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:997.408807583299, orders per episode:15.0, no profit episodes:1, model: CNN, comment: 
+2021-07-13 20:23, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:1011.3127897087965, orders per episode:23.0, no profit episodes:0, model: CNN, comment: 
+2021-07-13 20:27, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:970.9523603109667, orders per episode:19.0, no profit episodes:1, model: CNN, comment: test_visualize
+2021-07-14 08:13, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:968.1334781727888, orders per episode:23.0, no profit episodes:1, model: CNN, comment: test_visualize
+2021-07-14 08:14, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:1047.625171566844, orders per episode:21.0, no profit episodes:0, model: CNN, comment: test_visualize
+2021-07-14 08:18, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:971.5132352128617, orders per episode:19.0, no profit episodes:1, model: CNN, comment: test_visualize
+2021-07-14 08:52, fpt_Crypto_trader, test episodes:1, net worth:1311.9179784392481, orders per episode:13.0, no profit episodes:0, model: CNN, comment: 
+2021-07-14 08:53, fpt_Crypto_trader, test episodes:1, net worth:1229.5636453474451, orders per episode:11.0, no profit episodes:0, model: CNN, comment: 
+2021-07-14 08:55, fpt_Crypto_trader, test episodes:1, net worth:1266.9030578100508, orders per episode:11.0, no profit episodes:0, model: CNN, comment: 
+2021-07-14 08:55, fpt_Crypto_trader, test episodes:1, net worth:1294.9128391698414, orders per episode:11.0, no profit episodes:0, model: CNN, comment: 
+2021-07-14 08:56, fpt_Crypto_trader, test episodes:1, net worth:1235.0371922071758, orders per episode:9.0, no profit episodes:0, model: CNN, comment: 
+2021-07-14 08:56, /fpt_agent_PG_1e-05.h5, test episodes:1, net worth:1227.5785814525009, orders per episode:5.0, no profit episodes:0, model: CNN, comment: 
+2021-07-14 09:02, fpt_Crypto_trader, test episodes:1, net worth:1254.6703208476013, orders per episode:11.0, no profit episodes:0, model: CNN, comment: 
+2021-07-14 09:02, /fpt_agent_PG_1e-05.h5, test episodes:1, net worth:1165.4237874261155, orders per episode:3.0, no profit episodes:0, model: CNN, comment: 
+2021-07-14 09:32, vic_Crypto_trader, test episodes:1, net worth:1000.0, orders per episode:0.0, no profit episodes:0, model: CNN, comment: 
+2021-07-14 09:33, /vic_agent_PG_1e-05.h5, test episodes:1, net worth:998.5162362774774, orders per episode:23.0, no profit episodes:1, model: CNN, comment: 

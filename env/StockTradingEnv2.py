@@ -19,11 +19,11 @@ from tensorboardX import SummaryWriter
 from tensorflow.keras.optimizers import Adam, RMSprop
 from keras.models import Model, load_model
 #in colab
-from env.model import Actor_Model, Critic_Model, Shared_Model,PGModel
-from env.utils import TradingGraph, Write_to_file
+# from env.model import Actor_Model, Critic_Model, Shared_Model,PGModel, DQNModel
+# from env.utils import TradingGraph, Write_to_file
 
-# from model import Actor_Model, Critic_Model, Shared_Model, PGModel
-# from utils import TradingGraph, Write_to_file
+from model import Actor_Model, Critic_Model, Shared_Model, PGModel, DQNModel
+from utils import TradingGraph, Write_to_file
 import matplotlib.pyplot as plt
 from datetime import datetime
 import cv2 
@@ -382,7 +382,196 @@ class CustomEnv:
 			# Render the environment to the screen
 			return self.visualization.render(Date, Open, High, Low, Close, Volume, self.net_worth, self.trades)
 
+class DQNAgent:
+	def __init__(self, env, lookback_window_size=50, lr=0.00005, epochs=1, batch_size=200, EPISODES = 10000, gamma = 0.95):
+		# df = pd.read_csv('excel_hvn.csv')
+		# # df['Date'] = pd.to_datetime(df['Date'])
+		# # df = df.sort_values('Date')
+		# lookback_window_size = 10
+		# num = 10
+		# train_df = df[:-num-lookback_window_size]
+		# train_df.info()
+		# test_df = df[-num-lookback_window_size:] # 30 days
+
+
+		self.env = env #CustomEnv(df, lookback_window_size=lookback_window_size)
+		# by default, CartPole-v1 has max episode steps = 500
+		self.state_size = 18*lookback_window_size
+		self.action_size = 3
+		self.EPISODES = EPISODES
+		self.memory = deque(maxlen=2000)
 		
+		self.gamma = gamma    # discount rate
+		self.epsilon = 1.0  # exploration rate
+		self.epsilon_min = 0.001
+		self.epsilon_decay = 0.999
+		self.batch_size = batch_size
+		self.train_start = len(env.df)
+
+		# create main model
+		self.model = DQNModel(input_shape=(self.state_size,), action_space = self.action_size)
+		print(f'env: {self.env}')
+		print(f'state_size: {self.state_size}')
+		print(f'action_size: {self.action_size}')
+		print(f'memory: {self.memory}')
+
+	def remember(self, state, action, reward, next_state, done):
+		self.memory.append((state, action, reward, next_state, done))
+		if len(self.memory) > self.train_start:
+			if self.epsilon > self.epsilon_min:
+				self.epsilon *= self.epsilon_decay
+
+	def act(self, state):
+		if np.random.random() <= self.epsilon:
+			return random.randrange(self.action_size)
+		else:
+			return np.argmax(self.model.predict(state))
+
+	def replay(self):
+		if len(self.memory) < self.train_start:
+			return
+		# Randomly sample minibatch from the memory
+		minibatch = random.sample(self.memory, min(len(self.memory), self.batch_size))
+
+		state = np.zeros((self.batch_size, self.state_size))
+		next_state = np.zeros((self.batch_size, self.state_size))
+		action, reward, done = [], [], []
+
+		# do this before prediction
+		# for speedup, this could be done on the tensor level
+		# but easier to understand using a loop
+		for i in range(self.batch_size):
+			state[i] = minibatch[i][0]
+			action.append(minibatch[i][1])
+			reward.append(minibatch[i][2])
+			next_state[i] = minibatch[i][3]
+			done.append(minibatch[i][4])
+
+		# do batch prediction to save speed
+		target = self.model.predict(state)
+		target_next = self.model.predict(next_state)
+
+		for i in range(self.batch_size):
+			# correction on the Q value for the action used
+			if done[i]:
+				target[i][action[i]] = reward[i]
+			else:
+				# Standard - DQN
+				# DQN chooses the max Q value among next actions
+				# selection and evaluation of action is on the target Q Network
+				# Q_max = max_a' Q_target(s', a')
+				target[i][action[i]] = reward[i] + self.gamma * (np.amax(target_next[i]))
+
+		# Train the Neural Network with batches
+		self.model.fit(state, target, batch_size=self.batch_size, verbose=0)
+
+
+	def load(self, name):
+		self.model = load_model(name)
+
+	def save(self, save_folder = '../weightsDQN', save_filename = ''):
+		self.model.save(f'{save_folder}/{save_filename}')
+		w = open(f'{save_folder}/DQN_AverageProfits_Log.txt','a+')
+		w.write(f'{save_filename}: {np.mean(self.env._profits)}\n')
+
+
+			
+	def train(self, save_folder = '../weightsDQN', save_filename = 'DQN'):
+		prev_avg_profits = -99999999
+		for e in range(self.EPISODES):
+			state = self.env.reset()
+			state = np.reshape(state, [1, self.state_size])
+			done = False
+			i = 0
+			print('episode: ',e)
+			while not done:
+				# self.env.render()
+				action = self.act(state)
+				next_state, reward, done = self.env.step(action)
+				if done:     
+					avg_profit = np.mean(self.env._profits)
+					print("episode: {}/{}, avg_profit: {}, e: {:.2}".format(e, self.EPISODES, avg_profit, self.epsilon))
+					# if prev_avg_profits < avg_profit and e > 100:
+					if e >= 100 and avg_profit <= self.env.initial_balance*2 and avg_profit >= self.env.initial_balance:
+						prev_avg_profits = avg_profit
+						print(f"Saving trained model as {save_filename}_Episode({e}).h5")
+						self.save(save_folder=save_folder,save_filename=f'{save_filename}_Episode({e}).h5')
+					# self.env.render_all(f"SaveModel/DQN_Episode({e})")
+					self.env._profits.clear()
+					self.env._networths.clear()
+					break
+				next_state = np.reshape(next_state, [1, self.state_size])
+				if not done or i == self.env._max_episode_steps-1:
+					reward = reward
+				else:
+					reward = -100
+				self.remember(state, action, reward, next_state, done)
+				state = next_state
+				i += 1
+
+				self.replay()
+
+	# def retrain(self):
+	#     num = 368
+	#     self.load(f"SaveModel/DQN_Episode({num}).h5")
+	#     prev_avg_profits = -99999999
+	#     for e in range(self.EPISODES):
+	#         state = self.env.reset()
+	#         state = np.reshape(state, [1, self.state_size])
+	#         done = False
+	#         i = 0
+	#         print('episode: ',e)
+	#         while not done:
+	#             self.env.render()
+	#             action = self.act(state)
+	#             next_state, reward, done = self.env.step(action)
+	#             if done:     
+	#                 avg_profit = np.mean(self.env._profits)
+	#                 print("episode: {}/{}, avg_profit: {}, e: {:.2}".format(e, self.EPISODES, avg_profit, self.epsilon))
+	#                 if prev_avg_profits < avg_profit:
+	#                     prev_avg_profits = avg_profit
+	#                     print(f"Saving trained model as {save_filename}_Episode({e}).h5")
+	#                     self.save(save_folder=save_folder,save_filename=f'{save_filename}_Episode({e}).h5')
+	#                 # self.env.render_all(f"SaveModel/DQN_Episode({e})")
+	#                 self.env._profits.clear()
+	#                 self.env._networths.clear()
+	#                 break
+	#             next_state = np.reshape(next_state, [1, self.state_size])
+	#             if not done or i == self.env._max_episode_steps-1:
+	#                 reward = reward
+	#             else:
+	#                 reward = -100
+	#             self.remember(state, action, reward, next_state, done)
+	#             state = next_state
+	#             i += 1
+
+	#             self.replay()
+
+
+	def test(self, save_folder = '../weightsDQN', filename='DQN_Episode(2).h5', episode = 1, visualize= False):
+		
+		print(f"{save_folder}/{filename}")
+		self.load(f"{save_folder}/{filename}")
+		for e in range(episode):
+			state = self.env.reset()
+			state = np.reshape(state, [1, self.state_size])
+			done = False
+			i = 0
+			while not done:
+				img = self.env.render(visualize)
+				action = np.argmax(self.model.predict(state))
+				next_state, reward, done= self.env.step(action)
+				if self.env.current_step == self.env.end_step:
+					# print("{} episode: {}/{}, avg_profit: {}".format(filename, e, self.EPISODES, np.mean(self.env._profits)))
+					# self.env.render_all(f"{filename}.png")
+					# return np.mean(self.env._profits)
+					break
+				state = np.reshape(next_state, [1, self.state_size])
+				i += 1
+		
+		return img
+
+
 def Random_games(env, visualize, test_episodes = 50, comment=""):
 	average_net_worth = 0
 	average_orders = 0
@@ -519,8 +708,16 @@ if __name__ == "__main__":
 
 	test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
 
-	img = test_agent(test_env, agent_PG, True, 1, "/home/huyle/MyGit/Stock-Trading-Environment/weights", "/vic_agent_PG_1e-05.h5")
-	cv2.imshow('res', img)
-	cv2.waitKey(0);
+	img = test_agent(test_env, agent_PG, True, 1, "/home/huyle/MyGit/Stock-Trading-Environment/weights", "/vic_agent_PG_1e-05.h5", "test_visualize")
+	# cv2.imshow('res', img)
+	# cv2.waitKey(0);
+	cv2.imwrite("VIC_PG.jpg", img)
 	
+
+	# test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size, Show_reward=False)
+
+	agent_DQN = DQNAgent(test_env, lookback_window_size= lookback_window_size)
+
+	img = agent_DQN.test(save_folder="/home/huyle/MyGit/Stock-Trading-Environment/weights", filename="VIC_DQN_Episode(1023).h5", visualize= True)
+	cv2.imwrite("VIC_DQN.jpg", img)
 	
