@@ -1,0 +1,4 @@
+mplfinance
+ta
+tensorboardX
+finta
